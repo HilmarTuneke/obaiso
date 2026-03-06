@@ -1,0 +1,12 @@
+{
+  "cb:hasSku": "SKU-ECB-900",
+  "cb:modelName": "Demo Bike",
+  "cb:hasMaxPayloadKg": 200,
+  "@type": "cb:CargoBike",
+  "cb:hasWeightKg": 40.0,
+  "cb:hasWheelCount": 2,
+  "@context": {
+    "@vocab": "https://example.com/ont/cargobike#",
+    "cb": "https://example.com/ont/cargobike#"
+  }
+}

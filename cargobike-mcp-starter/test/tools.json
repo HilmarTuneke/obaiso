@@ -1,0 +1,57 @@
+{
+  "tools": [
+    {
+      "name": "getBikeBySku",
+      "inputSchema": {
+        "properties": {
+          "sku": {
+            "type": "string",
+            "x-semantic": {
+              "ontology": "https://example.com/ont/cargobike#",
+              "property": "cb:hasSku"
+            }
+          }
+        },
+        "type": "object",
+        "required": [
+          "sku"
+        ]
+      },
+      "description": "Return catalog info for a cargo bike by SKU."
+    },
+    {
+      "name": "getShipmentQuote",
+      "inputSchema": {
+        "properties": {
+          "countryCode": {
+            "type": "string",
+            "x-semantic": {
+              "ontology": "https://example.com/ont/cargobike#",
+              "property": "cb:countryCode"
+            }
+          },
+          "weightKg": {
+            "type": "number",
+            "x-semantic": {
+              "ontology": "https://example.com/ont/cargobike#",
+              "property": "cb:hasWeightKg"
+            }
+          },
+          "postalCode": {
+            "type": "string",
+            "x-semantic": {
+              "ontology": "https://example.com/ont/cargobike#",
+              "property": "cb:postalCode"
+            }
+          }
+        },
+        "type": "object",
+        "required": [
+          "postalCode",
+          "weightKg"
+        ]
+      },
+      "description": "Return shipping quote for weight and destination."
+    }
+  ]
+}
