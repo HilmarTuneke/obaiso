@@ -52,10 +52,30 @@ List tools:
 printf '%s
 ' '{"jsonrpc":"2.0","id":2,"method":"tools/list"}' | java -jar target/quarkus-app/quarkus-run.jar
 ```
-Call a tool:
+Get bike by SKU:
 ```bash
 printf '%s
 ' '{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"getBikeBySku","arguments":{"sku":"SKU-ECB-900"}}}' | java -jar target/quarkus-app/quarkus-run.jar
+```
+List bikes:
+```bash
+printf '%s\n' '{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"listCargoBikes","arguments":{}}}' | java -jar
+target/quarkus-app/quarkus-run.jar
+```
+Get customer:
+```bash
+printf '%s\n' '{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"getCustomer","arguments":{"customerId":"CUST-123"}}}' | java -jar
+target/quarkus-app/quarkus-run.jar
+```
+Get inventory:
+```bash
+printf '%s\n' '{"jsonrpc":"2.0","id":4,"method":"tools/call","params":{"name":"getInventoryBySku","arguments":{"sku":"SKU-ECB-900"}}}' | java -jar
+target/quarkus-app/quarkus-run.jar
+```
+Get order:
+```bash
+printf '%s\n' '{"jsonrpc":"2.0","id":5,"method":"tools/call","params":{"name":"getOrder","arguments":{"orderId":"ORD-1001"}}}' | java -jar
+target/quarkus-app/quarkus-run.jar
 ```
 
 ## Notes

@@ -1,57 +1,122 @@
 {
   "tools": [
     {
-      "name": "getBikeBySku",
       "inputSchema": {
+        "type": "object",
+        "properties": {}
+      },
+      "name": "listCargoBikes",
+      "description": "Return the full catalog of available cargo bikes."
+    },
+    {
+      "inputSchema": {
+        "required": [
+          "sku"
+        ],
+        "type": "object",
         "properties": {
           "sku": {
             "type": "string",
             "x-semantic": {
-              "ontology": "https://example.com/ont/cargobike#",
-              "property": "cb:hasSku"
+              "property": "cb:hasSku",
+              "ontology": "https://example.com/ont/cargobike#"
             }
           }
-        },
-        "type": "object",
-        "required": [
-          "sku"
-        ]
+        }
       },
-      "description": "Return catalog info for a cargo bike by SKU."
+      "name": "getBikeBySku",
+      "description": "Return catalog info for a single cargo bike by SKU."
     },
     {
-      "name": "getShipmentQuote",
       "inputSchema": {
+        "required": [
+          "customerId"
+        ],
+        "type": "object",
         "properties": {
-          "countryCode": {
+          "customerId": {
             "type": "string",
             "x-semantic": {
-              "ontology": "https://example.com/ont/cargobike#",
-              "property": "cb:countryCode"
+              "property": "cb:customerId",
+              "ontology": "https://example.com/ont/cargobike#"
+            }
+          }
+        }
+      },
+      "name": "getCustomer",
+      "description": "Return customer details by customer ID (format: CUST-{number})."
+    },
+    {
+      "inputSchema": {
+        "required": [
+          "sku"
+        ],
+        "type": "object",
+        "properties": {
+          "sku": {
+            "type": "string",
+            "x-semantic": {
+              "property": "cb:hasSku",
+              "ontology": "https://example.com/ont/cargobike#"
+            }
+          }
+        }
+      },
+      "name": "getInventoryBySku",
+      "description": "Return stock/inventory levels for a cargo bike by SKU."
+    },
+    {
+      "inputSchema": {
+        "required": [
+          "orderId"
+        ],
+        "type": "object",
+        "properties": {
+          "orderId": {
+            "type": "string",
+            "x-semantic": {
+              "property": "cb:orderId",
+              "ontology": "https://example.com/ont/cargobike#"
+            }
+          }
+        }
+      },
+      "name": "getOrder",
+      "description": "Return order details by order ID (format: ORD-{number})."
+    },
+    {
+      "inputSchema": {
+        "required": [
+          "postalCode",
+          "weightKg"
+        ],
+        "type": "object",
+        "properties": {
+          "postalCode": {
+            "type": "string",
+            "x-semantic": {
+              "property": "cb:postalCode",
+              "ontology": "https://example.com/ont/cargobike#"
             }
           },
           "weightKg": {
             "type": "number",
             "x-semantic": {
-              "ontology": "https://example.com/ont/cargobike#",
-              "property": "cb:hasWeightKg"
+              "property": "cb:hasWeightKg",
+              "ontology": "https://example.com/ont/cargobike#"
             }
           },
-          "postalCode": {
+          "countryCode": {
             "type": "string",
             "x-semantic": {
-              "ontology": "https://example.com/ont/cargobike#",
-              "property": "cb:postalCode"
+              "property": "cb:countryCode",
+              "ontology": "https://example.com/ont/cargobike#"
             }
           }
-        },
-        "type": "object",
-        "required": [
-          "postalCode",
-          "weightKg"
-        ]
+        }
       },
-      "description": "Return shipping quote for weight and destination."
+      "name": "getShipmentQuote",
+      "description": "Return a shipping quote for a given weight and destination."
     }
   ]
 }
