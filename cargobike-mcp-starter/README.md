@@ -36,7 +36,7 @@ cargobike-mcp-starter/
 ## Build & Run
 ```bash
 mvn -q package
-java -jar target/quarkus-app/quarkus-run.jar
+java --sun-misc-unsafe-memory-access=allow -jar target/quarkus-app/quarkus-run.jar
 ```
 
 The server reads **JSON-RPC 2.0** requests from stdin and writes responses to stdout.
