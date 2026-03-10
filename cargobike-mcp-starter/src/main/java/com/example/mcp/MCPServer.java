@@ -35,16 +35,26 @@ public class MCPServer implements QuarkusApplication {
                 JsonNode id = req.get("id");
                 JsonNode params = req.get("params");
 
+                // Notifications have no "id" — must not be answered
+                if (id == null)
+                    continue;
+
                 Object result = switch (method) {
                 case "initialize" -> Map.of(
+                    "protocolVersion", "2024-11-05",
                     "serverInfo", Map.of("name", "quarkus-mcp", "version", "1.0.0"),
                     "capabilities", Map.of(
-                        "tools", true, "resources", true, "prompts", true));
+                        "tools", Map.of(),
+                        "resources", Map.of(),
+                        "prompts", Map.of()));
                 case "tools/list" -> tools.list();
                 case "tools/call" -> {
                     String name = optText(params, "name");
                     JsonNode arguments = params != null ? params.get("arguments") : null;
-                    yield tools.call(name, arguments);
+                    Object toolResult = tools.call(name, arguments);
+                    yield Map.of("content", List.of(
+                        Map.of("type", "text", "text", mapper.writeValueAsString(toolResult))
+                    ));
                 }
                 case "resources/list" -> resources.list();
                 case "resources/read" -> {
@@ -63,12 +73,12 @@ public class MCPServer implements QuarkusApplication {
 
                 Map<String, Object> resp = RpcModels.success(id, result);
                 out.write(mapper.writeValueAsString(resp));
-                out.write("");
+                out.newLine();
                 out.flush();
             } catch (Exception e) {
                 Map<String, Object> err = RpcModels.error(null, -32603, "Internal error: " + e.getMessage());
                 out.write(mapper.writeValueAsString(err));
-                out.write("");
+                out.newLine();
                 out.flush();
             }
         }
