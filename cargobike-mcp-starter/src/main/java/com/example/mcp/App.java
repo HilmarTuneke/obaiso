@@ -6,7 +6,7 @@ import io.quarkus.runtime.annotations.QuarkusMain;
 
 @QuarkusMain
 public class App {
-    public static void main(String... args) {
-        Quarkus.run(MCPServer.class, args);
-    }
+  public static void main(String... args) {
+    Quarkus.run(MCPServer.class, args);
+  }
 }
