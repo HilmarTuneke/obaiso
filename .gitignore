@@ -9,4 +9,4 @@
 cargobike-mcp-starter/target
 *.log
 *.log.*
-cargobike-chatbot/.anthropic-api-key
+.env
