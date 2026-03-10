@@ -36,8 +36,7 @@ public class ToolsRegistry {
       "cb:modelName", "CargoMaster 500",
       "cb:hasWeightKg", 38.5,
       "cb:hasMaxPayloadKg", 200,
-      "cb:hasWheelCount", 2,
-      "cb:hasStockQuantity", 7
+      "cb:hasWheelCount", 2
     ),
     Map.of(
       "@type", "cb:EbikeCargoBike",
@@ -46,8 +45,15 @@ public class ToolsRegistry {
       "cb:hasWeightKg", 42.0,
       "cb:hasMaxPayloadKg", 220,
       "cb:hasWheelCount", 3,
-      "cb:hasBatteryCapacityWh", 750,
-      "cb:hasStockQuantity", 3
+      "cb:hasBatteryCapacityWh", 750
+    ),
+    Map.of(
+      "@type", "cb:CargoBike",
+      "cb:hasSku", "SKU-CB-002",
+      "cb:modelName", "UrbanHauler 300",
+      "cb:hasWeightKg", 34.0,
+      "cb:hasMaxPayloadKg", 150,
+      "cb:hasWheelCount", 2
     )
   );
 
@@ -85,6 +91,44 @@ public class ToolsRegistry {
         "cb:hasUnitPrice", Map.of("@type", "cb:Price", "cb:amount", 1899.0, "cb:currency", "EUR")
       )),
       "cb:hasTotalPrice", Map.of("@type", "cb:Price", "cb:amount", 3798.0, "cb:currency", "EUR")
+    ),
+    Map.of(
+      "@type", "cb:Order",
+      "cb:orderId", "ORD-003",
+      "cb:orderedBy", Map.of(
+        "@type", "cb:Customer",
+        "cb:customerId", "CUST-789",
+        "cb:email", "lars@example.com"
+      ),
+      "cb:hasStatus", "PAID",
+      "cb:hasItem", List.of(Map.of(
+        "@type", "cb:OrderItem",
+        "cb:hasSku", "SKU-CB-002",
+        "cb:quantity", 1,
+        "cb:hasUnitPrice", Map.of("@type", "cb:Price", "cb:amount", 1499.0, "cb:currency", "EUR")
+      )),
+      "cb:hasTotalPrice", Map.of("@type", "cb:Price", "cb:amount", 1499.0, "cb:currency", "EUR")
+    )
+  );
+
+  private static final List<Map<String, Object>> INVENTORY = List.of(
+    Map.of(
+      "@type", "cb:InventoryItem",
+      "cb:hasSku", "SKU-CB-001",
+      "cb:hasQuantity", 7,
+      "cb:warehouseCode", "NUE-01"
+    ),
+    Map.of(
+      "@type", "cb:InventoryItem",
+      "cb:hasSku", "SKU-ECB-900",
+      "cb:hasQuantity", 3,
+      "cb:warehouseCode", "NUE-01"
+    ),
+    Map.of(
+      "@type", "cb:InventoryItem",
+      "cb:hasSku", "SKU-CB-002",
+      "cb:hasQuantity", 0,
+      "cb:warehouseCode", "NUE-01"
     )
   );
 
@@ -229,13 +273,18 @@ public class ToolsRegistry {
           "cb:countryCode", "DE"
         )
       );
-      case "getInventoryBySku" -> Map.of(
-        "@context", ctx,
-        "@type", "cb:InventoryItem",
-        "cb:hasSku", args.path("sku").asText(),
-        "cb:hasQuantity", 7,
-        "cb:warehouseCode", "NUE-01"
-      );
+      case "getInventoryBySku" -> {
+        String sku = args.path("sku").asText();
+        yield INVENTORY.stream()
+          .filter(i -> sku.equals(i.get("cb:hasSku")))
+          .map(i -> {
+            Map<String, Object> result = new LinkedHashMap<>(i);
+            result.put("@context", ctx);
+            return (Object) result;
+          })
+          .findFirst()
+          .orElse(Map.of("error", "No inventory found for SKU: " + sku));
+      }
       case "getOrder" -> {
         String orderId = args.path("orderId").asText();
         yield ORDERS.stream()

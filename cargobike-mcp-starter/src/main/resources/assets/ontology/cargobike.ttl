@@ -68,12 +68,6 @@ cb:hasBatteryCapacityWh a rdf:Property ;
   rdfs:domain cb:EbikeCargoBike ;
   rdfs:range xsd:integer .
 
-cb:hasStockQuantity a rdf:Property ;
-  rdfs:label "has stock quantity" ;
-  rdfs:domain cb:CargoBike ;
-  rdfs:range xsd:integer ;
-  rdfs:comment "Number of units currently in stock." .
-
 cb:orderId a rdf:Property ;
   rdfs:domain cb:Order ;
   rdfs:range xsd:string .
