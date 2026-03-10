@@ -12,6 +12,7 @@ Usage:
 import asyncio
 import json
 import pathlib
+import re
 import sys
 
 import anthropic
@@ -60,8 +61,30 @@ Semantic mapping hints:
 - cb:hasSku identifies a bike; SKUs look like SKU-CB-001 or SKU-ECB-900
 - Customer IDs look like CUST-123, order IDs like ORD-1001
 
-Always call the appropriate tool to retrieve live data rather than guessing.
-Summarise results in plain, friendly language.
+ONTOLOGY-GROUNDED REASONING
+Before choosing a tool, you MAY call queryOntology with a SPARQL SELECT query to
+verify class hierarchies or property applicability (e.g., confirm that
+cb:EbikeCargoBike is a subclass of cb:CargoBike before calling listCargoBikes).
+
+STRUCTURED RESPONSE FORMAT
+Your final answer (once all tool calls are done) MUST be a JSON object with
+exactly two keys — no prose before or after it:
+
+{{
+  "reasoning": {{
+    "user_intent": "<one-line summary of what the user is asking>",
+    "mapped_concepts": ["<ontology URI or concept used>", ...],
+    "inferences_used": ["<e.g. cb:EbikeCargoBike rdfs:subClassOf cb:CargoBike>", ...],
+    "tools_selected": [
+      {{"tool": "<toolName>", "justified_by": "<ontology concept or property>"}}
+    ]
+  }},
+  "answer": "<friendly plain-language answer to the user>"
+}}
+
+The "reasoning" block is the explainability artifact — every concept must be a
+real URI from the ontology above. If no ontology inference was needed, set
+"inferences_used" to [].
 """
 
 
@@ -70,10 +93,22 @@ Summarise results in plain, friendly language.
 # ---------------------------------------------------------------------------
 
 def mcp_tool_to_claude(tool) -> dict:
-    """Convert an MCP Tool object to the Anthropic API tool dict format."""
+    """Convert an MCP Tool object to the Anthropic API tool dict format.
+
+    Tool-level x-semantic annotations (operatesOn / returns) are appended to
+    the description so Claude can use them to justify tool selection formally.
+    """
+    description = tool.description or ""
+    sem = (tool.model_extra or {}).get("x-semantic") if hasattr(tool, "model_extra") else None
+    if sem:
+        description += (
+            f"\n[x-semantic: ontology={sem.get('ontology', '')},"
+            f" operatesOn={sem.get('operatesOn', '')},"
+            f" returns={sem.get('returns', '')}]"
+        )
     return {
         "name": tool.name,
-        "description": tool.description or "",
+        "description": description,
         "input_schema": tool.inputSchema,
     }
 
@@ -81,6 +116,38 @@ def mcp_tool_to_claude(tool) -> dict:
 # ---------------------------------------------------------------------------
 # Agentic loop
 # ---------------------------------------------------------------------------
+
+def _parse_structured_response(text: str) -> tuple[dict | None, str]:
+    """
+    Try to extract {"reasoning": {...}, "answer": "..."} from the final text.
+    Returns (reasoning_dict, answer_text). If parsing fails, returns (None, text).
+    """
+    # Strip optional markdown code fences
+    stripped = re.sub(r"^```(?:json)?\s*", "", text.strip(), flags=re.MULTILINE)
+    stripped = re.sub(r"\s*```$", "", stripped.strip(), flags=re.MULTILINE)
+    try:
+        obj = json.loads(stripped.strip())
+        if isinstance(obj, dict) and "reasoning" in obj and "answer" in obj:
+            return obj["reasoning"], str(obj["answer"])
+    except (json.JSONDecodeError, ValueError):
+        pass
+    return None, text
+
+
+def _print_reasoning(reasoning: dict) -> None:
+    print("\n  ┌─ Reasoning trace ────────────────────────────────────")
+    if intent := reasoning.get("user_intent"):
+        print(f"  │  Intent   : {intent}")
+    if concepts := reasoning.get("mapped_concepts"):
+        print(f"  │  Concepts : {', '.join(concepts)}")
+    if inferences := reasoning.get("inferences_used"):
+        for inf in inferences:
+            print(f"  │  Inferred : {inf}")
+    if tools := reasoning.get("tools_selected"):
+        for t in tools:
+            print(f"  │  Tool     : {t.get('tool')} — justified by {t.get('justified_by')}")
+    print("  └──────────────────────────────────────────────────────")
+
 
 async def run_agent(
     session: ClientSession,
@@ -93,12 +160,13 @@ async def run_agent(
     Drive an agentic tool-use loop:
       1. Call Claude with the current conversation history.
       2. If Claude requests tool calls, execute them via the MCP session.
-      3. Feed results back and repeat until Claude produces a plain-text answer.
+      3. Feed results back and repeat until Claude produces a structured JSON answer.
+         The reasoning block is printed to the console; the answer text is returned.
     """
     while True:
         response = client.messages.create(
             model=MODEL,
-            max_tokens=1024,
+            max_tokens=2048,
             system=system,
             tools=claude_tools,
             messages=history,
@@ -108,7 +176,11 @@ async def run_agent(
         text_blocks = [b for b in response.content if b.type == "text"]
 
         if not tool_uses:
-            return " ".join(b.text for b in text_blocks)
+            raw = " ".join(b.text for b in text_blocks)
+            reasoning, answer = _parse_structured_response(raw)
+            if reasoning:
+                _print_reasoning(reasoning)
+            return answer
 
         # Append the full assistant turn (may include both text and tool_use blocks)
         history.append({"role": "assistant", "content": response.content})

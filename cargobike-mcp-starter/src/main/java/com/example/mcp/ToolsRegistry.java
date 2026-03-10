@@ -2,11 +2,32 @@
 package com.example.mcp;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import org.apache.jena.ontology.OntModel;
+import org.apache.jena.ontology.OntModelSpec;
+import org.apache.jena.query.*;
+import org.apache.jena.rdf.model.ModelFactory;
+import org.apache.jena.rdf.model.RDFNode;
+
+import java.io.InputStream;
 import java.util.*;
 
 public class ToolsRegistry {
 
   private static final String ONTOLOGY_URL = "https://example.com/ont/cargobike#";
+
+  private static final OntModel ONTOLOGY_MODEL = buildOntologyModel();
+
+  private static OntModel buildOntologyModel() {
+    final OntModel m = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM_MICRO_RULE_INF);
+    try (final InputStream is = ToolsRegistry.class.getResourceAsStream("/assets/ontology/cargobike.ttl")) {
+      if (is != null) {
+        m.read(is, ONTOLOGY_URL, "TTL");
+      }
+    } catch (Exception e) {
+      // fall through – empty model
+    }
+    return m;
+  }
 
   private static final List<Map<String, Object>> CATALOG = List.of(
     Map.of(
@@ -34,67 +55,94 @@ public class ToolsRegistry {
         Map.of(
           "name", "listCargoBikes",
           "description", "Return the full catalog of available cargo bikes.",
+          "x-semantic", getOntologyResult("cb:CargoBike", "cb:CargoBike"),
           "inputSchema", Map.of("type", "object", "properties", Map.of())
         ),
         Map.of(
           "name", "getBikeBySku",
           "description", "Return catalog info for a single cargo bike by SKU.",
+          "x-semantic", getOntologyResult("cb:CargoBike", "cb:CargoBike"),
           "inputSchema", Map.of(
             "type", "object",
             "properties", Map.of(
-              "sku", Map.of("type", "string", "x-semantic", getOntology("cb:hasSku"))),
+              "sku", Map.of("type", "string", "x-semantic", getOntologyProperty("cb:hasSku"))),
             "required", List.of("sku")
           )
         ),
         Map.of(
           "name", "getCustomer",
           "description", "Return customer details by customer ID (format: CUST-{number}).",
+          "x-semantic", getOntologyResult("cb:Customer", "cb:Customer"),
           "inputSchema", Map.of(
             "type", "object",
             "properties", Map.of(
-              "customerId", Map.of("type", "string", "x-semantic", getOntology("cb:customerId"))),
+              "customerId", Map.of("type", "string", "x-semantic", getOntologyProperty("cb:customerId"))),
             "required", List.of("customerId")
           )
         ),
         Map.of(
           "name", "getInventoryBySku",
           "description", "Return stock/inventory levels for a cargo bike by SKU.",
+          "x-semantic", getOntologyResult("cb:CargoBike", "cb:InventoryItem"),
           "inputSchema", Map.of(
             "type", "object",
             "properties", Map.of(
-              "sku", Map.of("type", "string", "x-semantic", getOntology("cb:hasSku"))),
+              "sku", Map.of("type", "string", "x-semantic", getOntologyProperty("cb:hasSku"))),
             "required", List.of("sku")
           )
         ),
         Map.of(
           "name", "getOrder",
           "description", "Return order details by order ID (format: ORD-{number}).",
+          "x-semantic", getOntologyResult("cb:Order", "cb:Order"),
           "inputSchema", Map.of(
             "type", "object",
             "properties", Map.of(
-              "orderId", Map.of("type", "string", "x-semantic", getOntology("cb:orderId"))),
+              "orderId", Map.of("type", "string", "x-semantic", getOntologyProperty("cb:orderId"))),
             "required", List.of("orderId")
           )
         ),
         Map.of(
           "name", "getShipmentQuote",
           "description", "Return a shipping quote for a given weight and destination.",
+          "x-semantic", getOntologyResult("cb:Address", "cb:ShipmentQuote"),
           "inputSchema", Map.of(
             "type", "object",
             "properties", Map.of(
-              "postalCode", Map.of("type", "string", "x-semantic", getOntology("cb:postalCode")),
-              "countryCode", Map.of("type", "string", "x-semantic", getOntology("cb:countryCode")),
-              "weightKg", Map.of("type", "number", "x-semantic", getOntology("cb:hasWeightKg"))
+              "postalCode", Map.of("type", "string", "x-semantic", getOntologyProperty("cb:postalCode")),
+              "countryCode", Map.of("type", "string", "x-semantic", getOntologyProperty("cb:countryCode")),
+              "weightKg", Map.of("type", "number", "x-semantic", getOntologyProperty("cb:hasWeightKg"))
             ),
             "required", List.of("postalCode", "weightKg")
+          )
+        ),
+        Map.of(
+          "name", "queryOntology",
+          "description", "Execute a SPARQL SELECT query against the cargo bike domain ontology "
+            + "(Apache Jena, OWL-micro inference enabled). Use this to look up class hierarchies, "
+            + "discover applicable properties for a concept, and verify subclass/range inferences "
+            + "before choosing other tools. The prefix cb: is bound to " + ONTOLOGY_URL + ".",
+          "inputSchema", Map.of(
+            "type", "object",
+            "properties", Map.of(
+              "sparql", Map.of(
+                "type", "string",
+                "description", "A SPARQL 1.1 SELECT query. Use PREFIX cb: <" + ONTOLOGY_URL + "> in the query."
+              )
+            ),
+            "required", List.of("sparql")
           )
         )
       )
     );
   }
 
-  private static Map<String, String> getOntology(String property) {
+  private static Map<String, String> getOntologyProperty(String property) {
     return Map.of("ontology", ONTOLOGY_URL, "property", property);
+  }
+
+  private static Map<String, String> getOntologyResult(String operatesOn, String returns) {
+    return Map.of("ontology", ONTOLOGY_URL, "operatesOn", operatesOn, "returns", returns);
   }
 
   public Object call(String name, JsonNode args) {
@@ -171,6 +219,29 @@ public class ToolsRegistry {
           "cb:hasTotalPrice", Map.of("@type", "cb:Price", "cb:amount", round(price), "cb:currency", "EUR"),
           "cb:estimatedDays", 3
         );
+      }
+      case "queryOntology" -> {
+        String sparql = args.path("sparql").asText();
+        try {
+          Query query = QueryFactory.create(sparql);
+          try (QueryExecution qe = QueryExecutionFactory.create(query, ONTOLOGY_MODEL)) {
+            ResultSet rs = qe.execSelect();
+            List<String> vars = rs.getResultVars();
+            List<Map<String, String>> rows = new ArrayList<>();
+            while (rs.hasNext()) {
+              QuerySolution sol = rs.nextSolution();
+              Map<String, String> row = new LinkedHashMap<>();
+              for (String v : vars) {
+                RDFNode n = sol.get(v);
+                row.put(v, n != null ? n.toString() : null);
+              }
+              rows.add(row);
+            }
+            yield Map.of("columns", vars, "rows", rows);
+          }
+        } catch (Exception e) {
+          yield Map.of("error", "SPARQL error: " + e.getMessage());
+        }
       }
       default -> Map.of("error", "Unknown tool: " + name);
     };

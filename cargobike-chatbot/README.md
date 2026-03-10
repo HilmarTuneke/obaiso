@@ -9,3 +9,4 @@ Example questions to try:
 - How many E-Cargo Pros are in stock?
 - What's the status of order ORD-1001?
 - How much does it cost to ship 50 kg to postal code 80331?
+- Are there orders for bikes out of stock?
