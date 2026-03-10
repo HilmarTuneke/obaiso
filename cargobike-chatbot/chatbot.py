@@ -1,8 +1,7 @@
 """
 Agentic chatbot for the cargo bike e-commerce store.
 
-Connects to the cargobike MCP server over stdio, uses the RDFS ontology to
-ground Claude's understanding of domain concepts, and runs an agentic tool-use
+Connects to the cargobike MCP server over stdio and runs an agentic tool-use
 loop to answer natural-language questions.
 
 Usage:
@@ -25,66 +24,33 @@ from mcp.client.stdio import stdio_client
 
 _BASE = pathlib.Path(__file__).parent.parent
 
-ONTOLOGY_PATH = (
-    _BASE / "cargobike-mcp-starter/src/main/resources/assets/ontology/cargobike.ttl"
-)
 MCP_JAR = _BASE / "cargobike-mcp-starter/target/quarkus-app/quarkus-run.jar"
 
 MODEL = "claude-sonnet-4-6"
 
 
 # ---------------------------------------------------------------------------
-# System prompt — ontology is embedded so Claude understands domain semantics
+# System prompt
 # ---------------------------------------------------------------------------
 
-def build_system_prompt(ontology: str) -> str:
-    return f"""\
+SYSTEM_PROMPT = """\
 You are a helpful assistant for a cargo bike e-commerce store.
 Use the available tools to answer questions about bikes, customers, orders, \
 inventory, and shipping.
-
-DOMAIN ONTOLOGY (RDFS/Turtle)
-The following ontology defines the meaning of all domain concepts. Use it to
-interpret user requests and map them to the correct tool and arguments:
-
-```turtle
-{ontology}
-```
-
-Semantic mapping hints:
-- "cargo bike" / "bike"          → cb:CargoBike        (listCargoBikes, getBikeBySku)
-- "electric" / "e-bike"          → cb:EbikeCargoBike   (subclass of cb:CargoBike)
-- "stock" / "availability"       → cb:InventoryItem     (getInventoryBySku)
-- "shipping cost" / "delivery"   → cb:ShipmentQuote     (getShipmentQuote)
-- "order" / "order status"       → cb:Order             (getOrder)
-- "customer" / "buyer"           → cb:Customer          (getCustomer)
-- cb:hasSku identifies a bike; SKUs look like SKU-CB-001 or SKU-ECB-900
-- Customer IDs look like CUST-123, order IDs like ORD-1001
-
-ONTOLOGY-GROUNDED REASONING
-Before choosing a tool, you MAY call queryOntology with a SPARQL SELECT query to
-verify class hierarchies or property applicability (e.g., confirm that
-cb:EbikeCargoBike is a subclass of cb:CargoBike before calling listCargoBikes).
 
 STRUCTURED RESPONSE FORMAT
 Your final answer (once all tool calls are done) MUST be a JSON object with
 exactly two keys — no prose before or after it:
 
-{{
-  "reasoning": {{
+{
+  "reasoning": {
     "user_intent": "<one-line summary of what the user is asking>",
-    "mapped_concepts": ["<ontology URI or concept used>", ...],
-    "inferences_used": ["<e.g. cb:EbikeCargoBike rdfs:subClassOf cb:CargoBike>", ...],
     "tools_selected": [
-      {{"tool": "<toolName>", "justified_by": "<ontology concept or property>"}}
+      {"tool": "<toolName>", "justified_by": "<reason>"}
     ]
-  }},
+  },
   "answer": "<friendly plain-language answer to the user>"
-}}
-
-The "reasoning" block is the explainability artifact — every concept must be a
-real URI from the ontology above. If no ontology inference was needed, set
-"inferences_used" to [].
+}
 """
 
 
@@ -93,22 +59,10 @@ real URI from the ontology above. If no ontology inference was needed, set
 # ---------------------------------------------------------------------------
 
 def mcp_tool_to_claude(tool) -> dict:
-    """Convert an MCP Tool object to the Anthropic API tool dict format.
-
-    Tool-level x-semantic annotations (operatesOn / returns) are appended to
-    the description so Claude can use them to justify tool selection formally.
-    """
-    description = tool.description or ""
-    sem = (tool.model_extra or {}).get("x-semantic") if hasattr(tool, "model_extra") else None
-    if sem:
-        description += (
-            f"\n[x-semantic: ontology={sem.get('ontology', '')},"
-            f" operatesOn={sem.get('operatesOn', '')},"
-            f" returns={sem.get('returns', '')}]"
-        )
+    """Convert an MCP Tool object to the Anthropic API tool dict format."""
     return {
         "name": tool.name,
-        "description": description,
+        "description": tool.description or "",
         "input_schema": tool.inputSchema,
     }
 
@@ -138,11 +92,6 @@ def _print_reasoning(reasoning: dict) -> None:
     print("\n  ┌─ Reasoning trace ────────────────────────────────────")
     if intent := reasoning.get("user_intent"):
         print(f"  │  Intent   : {intent}")
-    if concepts := reasoning.get("mapped_concepts"):
-        print(f"  │  Concepts : {', '.join(concepts)}")
-    if inferences := reasoning.get("inferences_used"):
-        for inf in inferences:
-            print(f"  │  Inferred : {inf}")
     if tools := reasoning.get("tools_selected"):
         for t in tools:
             print(f"  │  Tool     : {t.get('tool')} — justified by {t.get('justified_by')}")
@@ -209,16 +158,11 @@ async def run_agent(
 # ---------------------------------------------------------------------------
 
 async def main() -> None:
-    if not ONTOLOGY_PATH.exists():
-        sys.exit(f"Ontology not found: {ONTOLOGY_PATH}")
     if not MCP_JAR.exists():
         sys.exit(
             f"MCP JAR not found: {MCP_JAR}\n"
             "Build it first:  cd ../cargobike-mcp-starter && mvn -q package"
         )
-
-    ontology = ONTOLOGY_PATH.read_text(encoding="utf-8")
-    system_prompt = build_system_prompt(ontology)
 
     server_params = StdioServerParameters(
         command="java",
@@ -249,7 +193,7 @@ async def main() -> None:
 
                 history = [{"role": "user", "content": user_input}]
                 answer = await run_agent(
-                    session, claude_tools, history, client, system_prompt
+                    session, claude_tools, history, client, SYSTEM_PROMPT
                 )
                 print(f"\nAssistant: {answer}\n")
 

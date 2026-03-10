@@ -20,9 +20,8 @@ public class PromptsRegistry {
         "name", name,
         "template",
         """
-        You are given an Order (RDFS terms: cb:Order, cb:hasItem, cb:hasTotalPrice).
-        Summarize the order in 2 sentences for the customer. Be concise and neutral.
-        Input JSON-LD:
+        You are given an Order. Summarize it in 2 sentences for the customer. Be concise and neutral.
+        Input JSON:
         {{order_jsonld}}
         """
       );
@@ -32,9 +31,7 @@ public class PromptsRegistry {
         "name", name,
         "template",
         """
-        Recommend a cargo bike using ontology cues:
-        - payload requirement -> cb:hasMaxPayloadKg
-        - wheel preference -> cb:hasWheelCount
+        Recommend a cargo bike from the candidates below.
         Candidate bikes:
         {{bikes_jsonld}}
         Requirement: payload={{payloadKg}}, wheels={{wheelCount}}

@@ -11,7 +11,6 @@ public class ResourcesRegistry {
 
     public Map<String, Object> list() throws IOException {
         List<Map<String, String>> items = Stream.of(
-            "ontology/cargobike.ttl",
             "openapi/catalog.yaml",
             "openapi/orders.yaml",
             "openapi/customers.yaml",
