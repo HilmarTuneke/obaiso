@@ -62,6 +62,11 @@ List bikes:
 printf '%s\n' '{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"listCargoBikes","arguments":{}}}' | java -jar
 target/quarkus-app/quarkus-run.jar
 ```
+List orders:
+```bash
+printf '%s\n' '{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"listOrders","arguments":{}}}' | java -jar
+target/quarkus-app/quarkus-run.jar
+```
 Get customer:
 ```bash
 printf '%s\n' '{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"getCustomer","arguments":{"customerId":"CUST-123"}}}' | java -jar

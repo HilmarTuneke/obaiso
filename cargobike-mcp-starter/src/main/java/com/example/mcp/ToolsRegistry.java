@@ -49,6 +49,43 @@ public class ToolsRegistry {
     )
   );
 
+  private static final List<Map<String, Object>> ORDERS = List.of(
+    Map.of(
+      "@type", "cb:Order",
+      "cb:orderId", "ORD-001",
+      "cb:orderedBy", Map.of(
+        "@type", "cb:Customer",
+        "cb:customerId", "CUST-123",
+        "cb:email", "alex@example.com"
+      ),
+      "cb:hasStatus", "PROCESSING",
+      "cb:hasItem", List.of(Map.of(
+        "@type", "cb:OrderItem",
+        "cb:hasSku", "SKU-ECB-900",
+        "cb:quantity", 1,
+        "cb:hasUnitPrice", Map.of("@type", "cb:Price", "cb:amount", 4299.0, "cb:currency", "EUR")
+      )),
+      "cb:hasTotalPrice", Map.of("@type", "cb:Price", "cb:amount", 4299.0, "cb:currency", "EUR")
+    ),
+    Map.of(
+      "@type", "cb:Order",
+      "cb:orderId", "ORD-002",
+      "cb:orderedBy", Map.of(
+        "@type", "cb:Customer",
+        "cb:customerId", "CUST-456",
+        "cb:email", "maria@example.com"
+      ),
+      "cb:hasStatus", "SHIPPED",
+      "cb:hasItem", List.of(Map.of(
+        "@type", "cb:OrderItem",
+        "cb:hasSku", "SKU-CB-001",
+        "cb:quantity", 2,
+        "cb:hasUnitPrice", Map.of("@type", "cb:Price", "cb:amount", 1899.0, "cb:currency", "EUR")
+      )),
+      "cb:hasTotalPrice", Map.of("@type", "cb:Price", "cb:amount", 3798.0, "cb:currency", "EUR")
+    )
+  );
+
   public Map<String, Object> list() {
     return Map.of(
       "tools", List.of(
@@ -56,6 +93,12 @@ public class ToolsRegistry {
           "name", "listCargoBikes",
           "description", "Return the full catalog of available cargo bikes.",
           "x-semantic", getOntologyResult("cb:CargoBike", "cb:CargoBike"),
+          "inputSchema", Map.of("type", "object", "properties", Map.of())
+        ),
+        Map.of(
+          "name", "listOrders",
+          "description", "Return the full list of orders.",
+          "x-semantic", getOntologyResult("cb:Order", "cb:Order"),
           "inputSchema", Map.of("type", "object", "properties", Map.of())
         ),
         Map.of(
@@ -148,6 +191,11 @@ public class ToolsRegistry {
   public Object call(String name, JsonNode args) {
     Map<String, Object> ctx = Map.of("@vocab", ONTOLOGY_URL, "cb", ONTOLOGY_URL);
     return switch (name) {
+      case "listOrders" -> Map.of(
+        "@context", ctx,
+        "@type", "Collection",
+        "items", ORDERS
+      );
       case "listCargoBikes" -> Map.of(
         "@context", ctx,
         "@type", "Collection",
