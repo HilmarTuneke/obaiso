@@ -2,7 +2,7 @@
   "name": "Customers - Get Customer",
   "request": {
     "method": "GET",
-    "urlPattern": "/api/customers/CUST-[0-9]+"
+    "urlPattern": "/api/customers/BLUBB-[0-9]+"
   },
   "response": {
     "status": 200,
@@ -15,7 +15,7 @@
         "cb": "https://example.com/ont/cargobike#"
       },
       "@type": "cb:Customer",
-      "cb:customerId": "CUST-123",
+      "cb:customerId": "BLUBB-123",
       "cb:fullName": "Alex M\u00fcller",
       "cb:email": "alex@example.com",
       "cb:hasAddress": {

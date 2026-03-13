@@ -44,7 +44,7 @@
         }
       },
       "name": "getCustomer",
-      "description": "Return customer details by customer ID (format: CUST-{number})."
+      "description": "Return customer details by customer ID (format: BLUBB-{number})."
     },
     {
       "inputSchema": {

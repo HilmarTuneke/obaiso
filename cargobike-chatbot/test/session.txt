@@ -84,7 +84,7 @@ Assistant: Order ORD-002 has been **SHIPPED**! 🚚
 Here's a quick summary:
 - **Order ID:** ORD-002
 - **Status:** Shipped
-- **Customer:** maria@example.com (CUST-456)
+- **Customer:** maria@example.com (BLUBB-456)
 - **Items:** 2× SKU-CB-001 @ €1,899.00 each
 - **Total:** €3,798.00
 
@@ -136,12 +136,55 @@ Assistant: Yes! There is one order for an out-of-stock bike:
 |-------|--------|------|-----|-------------|----------------|
 | ORD-003 | PAID | UrbanHauler 300 | SKU-CB-002 | 1 | **0 (Out of Stock)** |
 
-Order **ORD-003** (placed by customer CUST-789, lars@example.com) is in **PAID** status and includes 1× UrbanHauler 300 (SKU-CB-002), but there are currently **0 units** in stock at warehouse NUE-01.
+Order **ORD-003** (placed by customer BLUBB-789, lars@example.com) is in **PAID** status and includes 1× UrbanHauler 300 (SKU-CB-002), but there are currently **0 units** in stock at warehouse NUE-01.
 
 The other two orders are fine:
 - **ORD-001** (E-Cargo Pro, SKU-ECB-900): 3 units in stock ✅
 - **ORD-002** (CargoMaster 500, SKU-CB-001): 7 units in stock ✅
 
 You may want to prioritize restocking SKU-CB-002 or contact the customer about the delay.
+
+You: Give me details about BLUBB-123
+  [tool] getCustomer({"customerId": "BLUBB-123"})
+
+  ┌─ Reasoning trace ────────────────────────────────────
+  │  Intent   : Retrieve and display full details for customer with ID BLUBB-123.
+  │  Concepts : cb:Customer, cb:customerId, cb:fullName, cb:email, cb:hasAddress, cb:Address, cb:street, cb:city, cb:postalCode, cb:countryCode
+  │  Tool     : getCustomer — justified by cb:Customer identified by cb:customerId property; getCustomer operatesOn cb:Customer and returns cb:Customer
+  └──────────────────────────────────────────────────────
+
+Assistant: Here are the details for customer **BLUBB-123**:
+
+- **Name:** Alex Müller
+- **Email:** alex@example.com
+- **Address:**
+  - Street: Hauptstraße 1
+  - City: Nürnberg
+  - Postal Code: 90402
+  - Country: DE (Germany)
+
+Let me know if there's anything else you'd like to know about this customer!
+
+You: Give me all orders from BLUBB-123
+  [tool] listOrders({})
+  [tool] getCustomer({"customerId": "BLUBB-123"})
+
+  ┌─ Reasoning trace ────────────────────────────────────
+  │  Intent   : List all orders placed by customer BLUBB-123.
+  │  Concepts : https://example.com/ont/cargobike#Order, https://example.com/ont/cargobike#Customer, https://example.com/ont/cargobike#orderedBy, https://example.com/ont/cargobike#customerId, https://example.com/ont/cargobike#orderId, https://example.com/ont/cargobike#hasStatus, https://example.com/ont/cargobike#hasTotalPrice
+  │  Tool     : listOrders — justified by cb:Order — needed to retrieve all orders so they can be filtered by cb:orderedBy → cb:customerId
+  │  Tool     : getCustomer — justified by cb:Customer / cb:customerId — fetches customer details to confirm identity and enrich the response
+  └──────────────────────────────────────────────────────
+
+Assistant: Here are the orders for **Alex Müller** (BLUBB-123, alex@example.com):
+
+| Order ID | Status | Item SKU | Qty | Unit Price | Total |
+|----------|--------|----------|-----|------------|-------|
+| ORD-001 | PROCESSING | SKU-ECB-900 | 1 | €4,299.00 | **€4,299.00** |
+
+Alex currently has **1 order**:
+- **ORD-001** is in **PROCESSING** status, containing 1× SKU-ECB-900 for a total of **€4,299.00 EUR**.
+
+Let me know if you'd like more details on this order or the bike!
 
 You: quit

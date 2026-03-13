@@ -63,7 +63,7 @@ public class ToolsRegistry {
       "cb:orderId", "ORD-001",
       "cb:orderedBy", Map.of(
         "@type", "cb:Customer",
-        "cb:customerId", "CUST-123",
+        "cb:customerId", "BLUBB-123",
         "cb:email", "alex@example.com"
       ),
       "cb:hasStatus", "PROCESSING",
@@ -80,7 +80,7 @@ public class ToolsRegistry {
       "cb:orderId", "ORD-002",
       "cb:orderedBy", Map.of(
         "@type", "cb:Customer",
-        "cb:customerId", "CUST-456",
+        "cb:customerId", "BLUBB-456",
         "cb:email", "maria@example.com"
       ),
       "cb:hasStatus", "SHIPPED",
@@ -97,7 +97,7 @@ public class ToolsRegistry {
       "cb:orderId", "ORD-003",
       "cb:orderedBy", Map.of(
         "@type", "cb:Customer",
-        "cb:customerId", "CUST-789",
+        "cb:customerId", "BLUBB-789",
         "cb:email", "lars@example.com"
       ),
       "cb:hasStatus", "PAID",
@@ -137,19 +137,16 @@ public class ToolsRegistry {
       "tools", List.of(
         Map.of(
           "name", "listCargoBikes",
-          "description", "Return the full catalog of available cargo bikes.",
           "x-semantic", getOntologyResult("cb:CargoBike", "cb:CargoBike"),
           "inputSchema", Map.of("type", "object", "properties", Map.of())
         ),
         Map.of(
           "name", "listOrders",
-          "description", "Return the full list of orders.",
           "x-semantic", getOntologyResult("cb:Order", "cb:Order"),
           "inputSchema", Map.of("type", "object", "properties", Map.of())
         ),
         Map.of(
           "name", "getBikeBySku",
-          "description", "Return catalog info for a single cargo bike by SKU.",
           "x-semantic", getOntologyResult("cb:CargoBike", "cb:CargoBike"),
           "inputSchema", Map.of(
             "type", "object",
@@ -160,7 +157,6 @@ public class ToolsRegistry {
         ),
         Map.of(
           "name", "getCustomer",
-          "description", "Return customer details by customer ID (format: CUST-{number}).",
           "x-semantic", getOntologyResult("cb:Customer", "cb:Customer"),
           "inputSchema", Map.of(
             "type", "object",
@@ -171,7 +167,6 @@ public class ToolsRegistry {
         ),
         Map.of(
           "name", "getInventoryBySku",
-          "description", "Return stock/inventory levels for a cargo bike by SKU.",
           "x-semantic", getOntologyResult("cb:CargoBike", "cb:InventoryItem"),
           "inputSchema", Map.of(
             "type", "object",
@@ -182,7 +177,6 @@ public class ToolsRegistry {
         ),
         Map.of(
           "name", "getOrder",
-          "description", "Return order details by order ID (format: ORD-{number}).",
           "x-semantic", getOntologyResult("cb:Order", "cb:Order"),
           "inputSchema", Map.of(
             "type", "object",
@@ -193,7 +187,6 @@ public class ToolsRegistry {
         ),
         Map.of(
           "name", "getShipmentQuote",
-          "description", "Return a shipping quote for a given weight and destination.",
           "x-semantic", getOntologyResult("cb:Address", "cb:ShipmentQuote"),
           "inputSchema", Map.of(
             "type", "object",

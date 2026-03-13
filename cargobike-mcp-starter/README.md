@@ -69,7 +69,7 @@ target/quarkus-app/quarkus-run.jar
 ```
 Get customer:
 ```bash
-printf '%s\n' '{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"getCustomer","arguments":{"customerId":"CUST-123"}}}' | java -jar
+printf '%s\n' '{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"getCustomer","arguments":{"customerId":"BLUBB-123"}}}' | java -jar
 target/quarkus-app/quarkus-run.jar
 ```
 Get inventory:

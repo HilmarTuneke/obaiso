@@ -18,7 +18,7 @@
       "cb:orderId": "ORD-1001",
       "cb:orderedBy": {
         "@type": "cb:Customer",
-        "cb:customerId": "CUST-123",
+        "cb:customerId": "BLUBB-123",
         "cb:email": "alex@example.com"
       },
       "cb:hasStatus": "PROCESSING",

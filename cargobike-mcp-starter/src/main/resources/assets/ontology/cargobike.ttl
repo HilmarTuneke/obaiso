@@ -115,7 +115,7 @@ cb:customerId a rdf:Property ;
   rdfs:domain cb:Customer ;
   rdfs:range [ a rdfs:Datatype ;
                owl:onDatatype xsd:string ;
-               owl:withRestrictions ( [ xsd:pattern "CUST-[0-9]+" ] ) ] .
+               owl:withRestrictions ( [ xsd:pattern "BLUBB-[0-9]+" ] ) ] .
 
 cb:fullName a rdf:Property ;
   rdfs:domain cb:Customer ;
