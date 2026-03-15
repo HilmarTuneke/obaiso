@@ -1,19 +1,32 @@
 {
   "tools": [
     {
+      "name": "listCargoBikes",
       "inputSchema": {
         "type": "object",
         "properties": {}
       },
-      "name": "listCargoBikes",
-      "description": "Return the full catalog of available cargo bikes."
+      "x-semantic": {
+        "ontology": "https://example.com/ont/cargobike#",
+        "operatesOn": "cb:CargoBike",
+        "returns": "cb:CargoBike"
+      }
     },
     {
+      "name": "listOrders",
       "inputSchema": {
-        "required": [
-          "sku"
-        ],
         "type": "object",
+        "properties": {}
+      },
+      "x-semantic": {
+        "ontology": "https://example.com/ont/cargobike#",
+        "operatesOn": "cb:Order",
+        "returns": "cb:Order"
+      }
+    },
+    {
+      "name": "getBikeBySku",
+      "inputSchema": {
         "properties": {
           "sku": {
             "type": "string",
@@ -22,17 +35,21 @@
               "ontology": "https://example.com/ont/cargobike#"
             }
           }
-        }
+        },
+        "type": "object",
+        "required": [
+          "sku"
+        ]
       },
-      "name": "getBikeBySku",
-      "description": "Return catalog info for a single cargo bike by SKU."
+      "x-semantic": {
+        "ontology": "https://example.com/ont/cargobike#",
+        "operatesOn": "cb:CargoBike",
+        "returns": "cb:CargoBike"
+      }
     },
     {
+      "name": "getCustomer",
       "inputSchema": {
-        "required": [
-          "customerId"
-        ],
-        "type": "object",
         "properties": {
           "customerId": {
             "type": "string",
@@ -41,17 +58,21 @@
               "ontology": "https://example.com/ont/cargobike#"
             }
           }
-        }
+        },
+        "type": "object",
+        "required": [
+          "customerId"
+        ]
       },
-      "name": "getCustomer",
-      "description": "Return customer details by customer ID (format: BLUBB-{number})."
+      "x-semantic": {
+        "ontology": "https://example.com/ont/cargobike#",
+        "operatesOn": "cb:Customer",
+        "returns": "cb:Customer"
+      }
     },
     {
+      "name": "getInventoryBySku",
       "inputSchema": {
-        "required": [
-          "sku"
-        ],
-        "type": "object",
         "properties": {
           "sku": {
             "type": "string",
@@ -60,17 +81,21 @@
               "ontology": "https://example.com/ont/cargobike#"
             }
           }
-        }
+        },
+        "type": "object",
+        "required": [
+          "sku"
+        ]
       },
-      "name": "getInventoryBySku",
-      "description": "Return stock/inventory levels for a cargo bike by SKU."
+      "x-semantic": {
+        "ontology": "https://example.com/ont/cargobike#",
+        "operatesOn": "cb:CargoBike",
+        "returns": "cb:InventoryItem"
+      }
     },
     {
+      "name": "getOrder",
       "inputSchema": {
-        "required": [
-          "orderId"
-        ],
-        "type": "object",
         "properties": {
           "orderId": {
             "type": "string",
@@ -79,30 +104,26 @@
               "ontology": "https://example.com/ont/cargobike#"
             }
           }
-        }
+        },
+        "type": "object",
+        "required": [
+          "orderId"
+        ]
       },
-      "name": "getOrder",
-      "description": "Return order details by order ID (format: ORD-{number})."
+      "x-semantic": {
+        "ontology": "https://example.com/ont/cargobike#",
+        "operatesOn": "cb:Order",
+        "returns": "cb:Order"
+      }
     },
     {
+      "name": "getShipmentQuote",
       "inputSchema": {
-        "required": [
-          "postalCode",
-          "weightKg"
-        ],
-        "type": "object",
         "properties": {
           "postalCode": {
             "type": "string",
             "x-semantic": {
               "property": "cb:postalCode",
-              "ontology": "https://example.com/ont/cargobike#"
-            }
-          },
-          "weightKg": {
-            "type": "number",
-            "x-semantic": {
-              "property": "cb:hasWeightKg",
               "ontology": "https://example.com/ont/cargobike#"
             }
           },
@@ -112,11 +133,42 @@
               "property": "cb:countryCode",
               "ontology": "https://example.com/ont/cargobike#"
             }
+          },
+          "weightKg": {
+            "type": "number",
+            "x-semantic": {
+              "property": "cb:hasWeightKg",
+              "ontology": "https://example.com/ont/cargobike#"
+            }
           }
-        }
+        },
+        "type": "object",
+        "required": [
+          "postalCode",
+          "weightKg"
+        ]
       },
-      "name": "getShipmentQuote",
-      "description": "Return a shipping quote for a given weight and destination."
+      "x-semantic": {
+        "ontology": "https://example.com/ont/cargobike#",
+        "operatesOn": "cb:Address",
+        "returns": "cb:ShipmentQuote"
+      }
+    },
+    {
+      "name": "queryOntology",
+      "inputSchema": {
+        "properties": {
+          "sparql": {
+            "type": "string",
+            "description": "A SPARQL 1.1 SELECT query. Use PREFIX cb: <https://example.com/ont/cargobike#> in the query."
+          }
+        },
+        "type": "object",
+        "required": [
+          "sparql"
+        ]
+      },
+      "description": "Execute a SPARQL SELECT query against the cargo bike domain ontology (Apache Jena, OWL-micro inference enabled). Use this to look up class hierarchies, discover applicable properties for a concept, and verify subclass/range inferences before choosing other tools. The prefix cb: is bound to https://example.com/ont/cargobike#."
     }
   ]
 }
