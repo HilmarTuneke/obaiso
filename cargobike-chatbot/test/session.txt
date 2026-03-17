@@ -187,4 +187,17 @@ Alex currently has **1 order**:
 
 Let me know if you'd like more details on this order or the bike!
 
+You: How much does it cost to ship SKU-CB-002 to 80331?
+  [tool] getBikeBySku({"sku": "SKU-CB-002"})
+  [tool] getShipmentQuote({"postalCode": "80331", "weightKg": 34.0})
+
+  ┌─ Reasoning trace ────────────────────────────────────
+  │  Intent   : Find out the shipping cost for cargo bike SKU-CB-002 to postal code 80331.
+  │  Concepts : cb:CargoBike, cb:hasSku, cb:hasWeightKg, cb:ShipmentQuote, cb:hasTotalPrice, cb:Price, cb:postalCode, cb:Address
+  │  Tool     : getBikeBySku — justified by cb:hasSku — needed to retrieve the cb:CargoBike instance and its cb:hasWeightKg for the shipment quote calculation.
+  │  Tool     : getShipmentQuote — justified by cb:ShipmentQuote / cb:postalCode — used to compute the delivery cost and estimated transit time based on the bike's weight and destination postal code.
+  └──────────────────────────────────────────────────────
+
+Assistant: Shipping the **UrbanHauler 300** (SKU-CB-002) to postal code **80331** (Munich, DE) will cost **€66.70**, with an estimated delivery time of **3 days**. The quote is based on the bike's weight of 34 kg.
+
 You: quit
