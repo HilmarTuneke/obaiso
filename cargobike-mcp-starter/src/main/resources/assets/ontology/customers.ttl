@@ -1,0 +1,61 @@
+
+@prefix cus:  <https://example.com/ont/cargobike/customers#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix gr:   <http://purl.org/goodrelations/v1#> .
+
+<https://example.com/ont/cargobike/customers> a owl:Ontology ;
+  rdfs:label "Customers Ontology" ;
+  rdfs:comment "Customer accounts and postal addresses." .
+
+###########
+# Classes #
+###########
+
+cus:Customer a rdfs:Class ;
+  rdfs:subClassOf gr:BusinessEntity ;
+  owl:hasKey (cus:customerId) ;
+  rdfs:label "Customer" .
+
+cus:Address a rdfs:Class ;
+  rdfs:label "Address" .
+
+################
+# Properties   #
+################
+
+cus:customerId a rdf:Property ;
+  rdfs:domain cus:Customer ;
+  rdfs:range [ a rdfs:Datatype ;
+               owl:onDatatype xsd:string ;
+               owl:withRestrictions ( [ xsd:pattern "BLUBB-[0-9]+" ] ) ] .
+
+cus:fullName a rdf:Property ;
+  rdfs:domain cus:Customer ;
+  rdfs:range xsd:string .
+
+cus:email a rdf:Property ;
+  rdfs:domain cus:Customer ;
+  rdfs:range xsd:string .
+
+cus:street a rdf:Property ;
+  rdfs:domain cus:Address ;
+  rdfs:range xsd:string .
+
+cus:city a rdf:Property ;
+  rdfs:domain cus:Address ;
+  rdfs:range xsd:string .
+
+cus:postalCode a rdf:Property ;
+  rdfs:domain cus:Address ;
+  rdfs:range xsd:string .
+
+cus:countryCode a rdf:Property ;
+  rdfs:domain cus:Address ;
+  rdfs:range xsd:string .
+
+cus:hasAddress a rdf:Property ;
+  rdfs:domain cus:Customer ;
+  rdfs:range cus:Address .

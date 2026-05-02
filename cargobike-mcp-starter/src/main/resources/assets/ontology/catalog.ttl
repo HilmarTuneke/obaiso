@@ -1,0 +1,61 @@
+
+@prefix cat:  <https://example.com/ont/cargobike/catalog#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+@prefix dbo:  <http://dbpedia.org/ontology/> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix wd:   <http://www.wikidata.org/entity/> .
+@prefix gr:   <http://purl.org/goodrelations/v1#> .
+
+<https://example.com/ont/cargobike/catalog> a owl:Ontology ;
+  rdfs:label "Catalog Ontology" ;
+  rdfs:comment "Product catalog: cargo bike models and their attributes." .
+
+###########
+# Classes #
+###########
+
+cat:CargoBike a rdfs:Class ;
+  rdfs:subClassOf dbo:Bicycle ;
+  rdfs:subClassOf gr:ProductOrServiceModel ;
+  skos:broadMatch wd:Q11442 ;
+  owl:hasKey (cat:hasSku) ;
+  rdfs:label "Cargo Bike" ;
+  rdfs:comment "A bike designed to carry loads." .
+
+cat:EbikeCargoBike a rdfs:Class ;
+  rdfs:subClassOf cat:CargoBike ;
+  rdfs:label "E-Cargo Bike" ;
+  rdfs:comment "An electrically-assisted cargo bike." .
+
+################
+# Properties   #
+################
+
+cat:hasSku a rdf:Property ;
+  rdfs:label "has SKU" ;
+  rdfs:range [ a rdfs:Datatype ;
+               owl:onDatatype xsd:string ;
+               owl:withRestrictions ( [ xsd:pattern "SKU-E?CB-[0-9]+" ] ) ] .
+
+cat:modelName a rdf:Property ;
+  rdfs:domain cat:CargoBike ;
+  rdfs:range xsd:string .
+
+cat:hasWeightKg a rdf:Property ;
+  rdfs:domain cat:CargoBike ;
+  rdfs:range xsd:decimal .
+
+cat:hasMaxPayloadKg a rdf:Property ;
+  rdfs:domain cat:CargoBike ;
+  rdfs:range xsd:decimal .
+
+cat:hasWheelCount a rdf:Property ;
+  rdfs:domain cat:CargoBike ;
+  rdfs:range xsd:integer .
+
+cat:hasBatteryCapacityWh a rdf:Property ;
+  rdfs:domain cat:EbikeCargoBike ;
+  rdfs:range xsd:integer .

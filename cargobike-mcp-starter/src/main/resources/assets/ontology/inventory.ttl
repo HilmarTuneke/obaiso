@@ -1,0 +1,30 @@
+
+@prefix inv:  <https://example.com/ont/cargobike/inventory#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+
+<https://example.com/ont/cargobike/inventory> a owl:Ontology ;
+  owl:imports <https://example.com/ont/cargobike/catalog> ;
+  rdfs:label "Inventory Ontology" ;
+  rdfs:comment "Warehouse stock levels per SKU." .
+
+###########
+# Classes #
+###########
+
+inv:InventoryItem a rdfs:Class ;
+  rdfs:label "Inventory Item" .
+
+################
+# Properties   #
+################
+
+inv:hasQuantity a rdf:Property ;
+  rdfs:domain inv:InventoryItem ;
+  rdfs:range xsd:integer .
+
+inv:warehouseCode a rdf:Property ;
+  rdfs:domain inv:InventoryItem ;
+  rdfs:range xsd:string .

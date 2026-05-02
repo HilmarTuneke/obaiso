@@ -1,0 +1,38 @@
+
+@prefix shp:  <https://example.com/ont/cargobike/shipping#> .
+@prefix cus:  <https://example.com/ont/cargobike/customers#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix gr:   <http://purl.org/goodrelations/v1#> .
+
+<https://example.com/ont/cargobike/shipping> a owl:Ontology ;
+  owl:imports <https://example.com/ont/cargobike/customers> ;
+  rdfs:label "Shipping Ontology" ;
+  rdfs:comment "Shipment quotes with delivery cost and estimated lead time." .
+
+###########
+# Classes #
+###########
+
+shp:ShipmentQuote a rdfs:Class ;
+  skos:relatedMatch gr:DeliveryChargeSpecification ;
+  rdfs:label "Shipment Quote" .
+
+################
+# Properties   #
+################
+
+shp:estimatedDays a rdf:Property ;
+  rdfs:domain shp:ShipmentQuote ;
+  rdfs:range xsd:integer .
+
+##################
+# Object Properties
+##################
+
+shp:shipsTo a rdf:Property ;
+  rdfs:domain shp:ShipmentQuote ;
+  rdfs:range cus:Address .
