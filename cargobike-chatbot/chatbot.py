@@ -24,9 +24,11 @@ _BASE = pathlib.Path(__file__).parent
 _PARENT = _BASE.parent
 load_dotenv(_BASE / ".env")
 
-ONTOLOGY_PATH = (
-        _PARENT / "cargobike-mcp-starter/src/main/resources/assets/ontology/cargobike.ttl"
+_ONTOLOGY_DIR = (
+    _PARENT / "cargobike-mcp-starter/src/main/resources/assets/ontology"
 )
+_ONTOLOGY_FILES = ["catalog.ttl", "customers.ttl", "inventory.ttl", "orders.ttl", "shipping.ttl"]
+
 MCP_JAR = _PARENT / "cargobike-mcp-starter/target/quarkus-app/quarkus-run.jar"
 
 MODEL = "claude-sonnet-4-6"
@@ -48,12 +50,12 @@ OUTPUT_SCHEMA = {
                         },
                         "mapped_concepts": {
                             "type": "array",
-                            "description": "Ontology URIs or concept names (e.g. cb:CargoBike) used to interpret the request.",
+                            "description": "Ontology URIs or concept names (e.g. cat:CargoBike) used to interpret the request.",
                             "items": {"type": "string"}
                         },
                         "inferences_used": {
                             "type": "array",
-                            "description": "RDFS/OWL inferences applied (e.g. 'cb:EbikeCargoBike rdfs:subClassOf cb:CargoBike'). Empty list if none.",
+                            "description": "RDFS/OWL inferences applied (e.g. 'cat:EbikeCargoBike rdfs:subClassOf cat:CargoBike'). Empty list if none.",
                             "items": {"type": "string"}
                         },
                         "tools_selected": {
@@ -110,12 +112,12 @@ interpret user requests and map them to the correct tool and arguments:
 ```
 
 Semantic mapping hints:
-- "stock" / "availability"       → cb:InventoryItem     (getInventoryBySku)
+- "stock" / "availability"       → inv:InventoryItem     (getInventoryBySku)
 
 ONTOLOGY-GROUNDED REASONING
 Before choosing a tool, you MAY call queryOntology with a SPARQL SELECT query to
 verify class hierarchies or property applicability (e.g., confirm that
-cb:EbikeCargoBike is a subclass of cb:CargoBike before calling listCargoBikes).
+cat:EbikeCargoBike is a subclass of cat:CargoBike before calling listCargoBikes).
 
 In your final answer, populate the reasoning block with real URIs from the ontology
 above. Every concept in mapped_concepts and inferences_used must be a real URI.
@@ -245,15 +247,18 @@ async def run_agent(
 # ---------------------------------------------------------------------------
 
 async def main() -> None:
-    if not ONTOLOGY_PATH.exists():
-        sys.exit(f"Ontology not found: {ONTOLOGY_PATH}")
+    missing = [f for f in _ONTOLOGY_FILES if not (_ONTOLOGY_DIR / f).exists()]
+    if missing:
+        sys.exit(f"Ontology file(s) not found in {_ONTOLOGY_DIR}: {', '.join(missing)}")
     if not MCP_JAR.exists():
         sys.exit(
             f"MCP JAR not found: {MCP_JAR}\n"
             "Build it first:  cd ../cargobike-mcp-starter && mvn -q package"
         )
 
-    ontology = ONTOLOGY_PATH.read_text(encoding="utf-8")
+    ontology = "\n\n".join(
+        (_ONTOLOGY_DIR / f).read_text(encoding="utf-8") for f in _ONTOLOGY_FILES
+    )
     system_prompt = build_system_prompt(ontology)
 
     server_params = StdioServerParameters(

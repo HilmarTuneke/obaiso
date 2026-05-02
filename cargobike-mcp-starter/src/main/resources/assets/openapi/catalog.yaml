@@ -5,7 +5,8 @@ info:
   version: 1.0.0
   description: List and describe cargo bikes.
   x-semantic:
-    base: https://example.com/ont/cargobike#
+    prefixes:
+      cat: https://example.com/ont/cargobike/catalog#
 servers:
   - url: https://api.example.com
 paths:
@@ -31,32 +32,32 @@ components:
   schemas:
     CargoBike:
       type: object
-      x-semantic: cb:CargoBike
+      x-semantic: cat:CargoBike
       properties:
         sku:
           type: string
-          x-semantic: cb:hasSku
+          x-semantic: cat:hasSku
         modelName:
           type: string
-          x-semantic: cb:modelName
+          x-semantic: cat:modelName
         weightKg:
           type: number
           format: float
-          x-semantic: cb:hasWeightKg
+          x-semantic: cat:hasWeightKg
         maxPayloadKg:
           type: number
           format: float
-          x-semantic: cb:hasMaxPayloadKg
+          x-semantic: cat:hasMaxPayloadKg
         wheelCount:
           type: integer
-          x-semantic: cb:hasWheelCount
+          x-semantic: cat:hasWheelCount
       required: [sku, modelName]
     EbikeCargoBike:
       allOf:
         - $ref: '#/components/schemas/CargoBike'
         - type: object
-          x-semantic: cb:EbikeCargoBike
+          x-semantic: cat:EbikeCargoBike
           properties:
             batteryCapacityWh:
               type: integer
-              x-semantic: cb:hasBatteryCapacityWh
+              x-semantic: cat:hasBatteryCapacityWh

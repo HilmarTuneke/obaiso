@@ -3,7 +3,9 @@ openapi: 3.1.0
 info:
   title: Customers Service
   version: 1.0.0
-  x-semantic: { base: https://example.com/ont/cargobike# }
+  x-semantic:
+    prefixes:
+      cus: https://example.com/ont/cargobike/customers#
 servers: [ { url: https://api.example.com } ]
 paths:
   /api/customers/{customerId}:
@@ -15,7 +17,7 @@ paths:
           name: customerId
           required: true
           schema: { type: string }
-          x-semantic: cb:customerId
+          x-semantic: cus:customerId
       responses:
         "200":
           description: OK
@@ -27,19 +29,19 @@ components:
   schemas:
     Address:
       type: object
-      x-semantic: cb:Address
+      x-semantic: cus:Address
       properties:
-        street: { type: string, x-semantic: cb:street }
-        city: { type: string, x-semantic: cb:city }
-        postalCode: { type: string, x-semantic: cb:postalCode }
-        countryCode: { type: string, x-semantic: cb:countryCode }
+        street: { type: string, x-semantic: cus:street }
+        city: { type: string, x-semantic: cus:city }
+        postalCode: { type: string, x-semantic: cus:postalCode }
+        countryCode: { type: string, x-semantic: cus:countryCode }
       required: [postalCode, countryCode]
     Customer:
       type: object
-      x-semantic: cb:Customer
+      x-semantic: cus:Customer
       properties:
-        customerId: { type: string, x-semantic: cb:customerId }
-        fullName: { type: string, x-semantic: cb:fullName }
-        email: { type: string, format: email, x-semantic: cb:email }
-        hasAddress: { $ref: '#/components/schemas/Address', x-semantic: cb:hasAddress }
+        customerId: { type: string, x-semantic: cus:customerId }
+        fullName: { type: string, x-semantic: cus:fullName }
+        email: { type: string, format: email, x-semantic: cus:email }
+        hasAddress: { $ref: '#/components/schemas/Address', x-semantic: cus:hasAddress }
       required: [customerId]

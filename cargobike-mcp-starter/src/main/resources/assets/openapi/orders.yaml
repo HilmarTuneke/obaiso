@@ -3,7 +3,11 @@ openapi: 3.1.0
 info:
   title: Orders Service
   version: 1.0.0
-  x-semantic: { base: https://example.com/ont/cargobike# }
+  x-semantic:
+    prefixes:
+      ord: https://example.com/ont/cargobike/orders#
+      cus: https://example.com/ont/cargobike/customers#
+      cat: https://example.com/ont/cargobike/catalog#
 servers: [ { url: https://api.example.com } ]
 paths:
   /api/orders/{orderId}:
@@ -15,7 +19,7 @@ paths:
           name: orderId
           required: true
           schema: { type: string }
-          x-semantic: cb:orderId
+          x-semantic: ord:orderId
       responses:
         "200":
           description: OK
@@ -27,36 +31,36 @@ components:
   schemas:
     Price:
       type: object
-      x-semantic: cb:Price
+      x-semantic: ord:Price
       properties:
-        amount: { type: number, format: float, x-semantic: cb:amount }
-        currency: { type: string, x-semantic: cb:currency }
+        amount: { type: number, format: float, x-semantic: ord:amount }
+        currency: { type: string, x-semantic: ord:currency }
       required: [amount, currency]
     OrderItem:
       type: object
-      x-semantic: cb:OrderItem
+      x-semantic: ord:OrderItem
       properties:
-        sku: { type: string, x-semantic: cb:hasSku }
-        quantity: { type: integer, x-semantic: cb:quantity }
+        sku: { type: string, x-semantic: cat:hasSku }
+        quantity: { type: integer, x-semantic: ord:quantity }
         unitPrice: { $ref: '#/components/schemas/Price' }
       required: [sku, quantity]
     Customer:
       type: object
-      x-semantic: cb:Customer
+      x-semantic: cus:Customer
       properties:
-        customerId: { type: string, x-semantic: cb:customerId }
-        email: { type: string, format: email, x-semantic: cb:email }
+        customerId: { type: string, x-semantic: cus:customerId }
+        email: { type: string, format: email, x-semantic: cus:email }
       required: [customerId]
     Order:
       type: object
-      x-semantic: cb:Order
+      x-semantic: ord:Order
       properties:
-        orderId: { type: string, x-semantic: cb:orderId }
-        hasStatus: { type: string, x-semantic: cb:hasStatus }
-        orderedBy: { $ref: '#/components/schemas/Customer', x-semantic: cb:orderedBy }
+        orderId: { type: string, x-semantic: ord:orderId }
+        hasStatus: { type: string, x-semantic: ord:hasStatus }
+        orderedBy: { $ref: '#/components/schemas/Customer', x-semantic: ord:orderedBy }
         hasItem:
           type: array
           items: { $ref: '#/components/schemas/OrderItem' }
-          x-semantic: cb:hasItem
-        hasTotalPrice: { $ref: '#/components/schemas/Price', x-semantic: cb:hasTotalPrice }
+          x-semantic: ord:hasItem
+        hasTotalPrice: { $ref: '#/components/schemas/Price', x-semantic: ord:hasTotalPrice }
       required: [orderId, orderedBy]

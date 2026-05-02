@@ -1,0 +1,75 @@
+
+@prefix ord:  <https://example.com/ont/cargobike/orders#> .
+@prefix cus:  <https://example.com/ont/cargobike/customers#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+
+<https://example.com/ont/cargobike/orders> a owl:Ontology ;
+  owl:imports <https://example.com/ont/cargobike/catalog> ;
+  owl:imports <https://example.com/ont/cargobike/customers> ;
+  rdfs:label "Orders Ontology" ;
+  rdfs:comment "Customer orders, line items, and prices." .
+
+###########
+# Classes #
+###########
+
+ord:Order a rdfs:Class ;
+  owl:hasKey (ord:orderId) ;
+  rdfs:label "Order" .
+
+ord:OrderItem a rdfs:Class ;
+  rdfs:label "Order Item" .
+
+ord:Price a rdfs:Class ;
+  rdfs:label "Price" .
+
+################
+# Properties   #
+################
+
+ord:orderId a rdf:Property ;
+  rdfs:domain ord:Order ;
+  rdfs:range [ a rdfs:Datatype ;
+               owl:onDatatype xsd:string ;
+               owl:withRestrictions ( [ xsd:pattern "ORD-[0-9]+" ] ) ] .
+
+ord:hasStatus a rdf:Property ;
+  rdfs:domain ord:Order ;
+  rdfs:range xsd:string ;
+  rdfs:comment "Lifecycle status (e.g., PROCESSING, SHIPPED)." .
+
+ord:amount a rdf:Property ;
+  rdfs:domain ord:Price ;
+  rdfs:range xsd:decimal .
+
+ord:currency a rdf:Property ;
+  rdfs:domain ord:Price ;
+  rdfs:range xsd:string ;
+  rdfs:comment "ISO 4217 currency code." .
+
+ord:quantity a rdf:Property ;
+  rdfs:domain ord:OrderItem ;
+  rdfs:range xsd:integer .
+
+##################
+# Object Properties
+##################
+
+ord:orderedBy a rdf:Property ;
+  rdfs:domain ord:Order ;
+  rdfs:range cus:Customer .
+
+ord:hasItem a rdf:Property ;
+  rdfs:domain ord:Order ;
+  rdfs:range ord:OrderItem .
+
+ord:hasUnitPrice a rdf:Property ;
+  rdfs:domain ord:OrderItem ;
+  rdfs:range ord:Price .
+
+ord:hasTotalPrice a rdf:Property ;
+  rdfs:domain ord:Order ;
+  rdfs:range ord:Price .
