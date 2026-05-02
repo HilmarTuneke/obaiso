@@ -4,9 +4,6 @@ info:
   title: Catalog Service
   version: 1.0.0
   description: List and describe cargo bikes.
-  x-semantic:
-    prefixes:
-      cat: https://example.com/ont/cargobike/catalog#
 servers:
   - url: https://api.example.com
 paths:
@@ -32,32 +29,36 @@ components:
   schemas:
     CargoBike:
       type: object
-      x-semantic: cat:CargoBike
+      x-jsonld-type: https://example.com/ont/cargobike/catalog#CargoBike
+      x-jsonld-context:
+        cat: https://example.com/ont/cargobike/catalog#
+        sku: cat:hasSku
+        modelName: cat:modelName
+        weightKg: cat:hasWeightKg
+        maxPayloadKg: cat:hasMaxPayloadKg
+        wheelCount: cat:hasWheelCount
       properties:
         sku:
           type: string
-          x-semantic: cat:hasSku
         modelName:
           type: string
-          x-semantic: cat:modelName
         weightKg:
           type: number
           format: float
-          x-semantic: cat:hasWeightKg
         maxPayloadKg:
           type: number
           format: float
-          x-semantic: cat:hasMaxPayloadKg
         wheelCount:
           type: integer
-          x-semantic: cat:hasWheelCount
       required: [sku, modelName]
     EbikeCargoBike:
       allOf:
         - $ref: '#/components/schemas/CargoBike'
         - type: object
-          x-semantic: cat:EbikeCargoBike
+          x-jsonld-type: https://example.com/ont/cargobike/catalog#EbikeCargoBike
+          x-jsonld-context:
+            cat: https://example.com/ont/cargobike/catalog#
+            batteryCapacityWh: cat:hasBatteryCapacityWh
           properties:
             batteryCapacityWh:
               type: integer
-              x-semantic: cat:hasBatteryCapacityWh

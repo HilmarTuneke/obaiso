@@ -3,12 +3,6 @@ openapi: 3.1.0
 info:
   title: Shipping Service
   version: 1.0.0
-  x-semantic:
-    prefixes:
-      shp: https://example.com/ont/cargobike/shipping#
-      cus: https://example.com/ont/cargobike/customers#
-      ord: https://example.com/ont/cargobike/orders#
-      cat: https://example.com/ont/cargobike/catalog#
 servers: [ { url: https://api.example.com } ]
 paths:
   /api/shipping/quote:
@@ -32,30 +26,53 @@ components:
   schemas:
     QuoteRequest:
       type: object
+      x-jsonld-context:
+        cus: https://example.com/ont/cargobike/customers#
+        cat: https://example.com/ont/cargobike/catalog#
+        postalCode: cus:postalCode
+        countryCode: cus:countryCode
+        weightKg: cat:hasWeightKg
       properties:
-        postalCode: { type: string, x-semantic: cus:postalCode }
-        countryCode: { type: string, x-semantic: cus:countryCode }
-        weightKg: { type: number, format: float, x-semantic: cat:hasWeightKg }
+        postalCode: { type: string }
+        countryCode: { type: string }
+        weightKg: { type: number, format: float }
       required: [postalCode, weightKg]
     Price:
       type: object
-      x-semantic: ord:Price
+      x-jsonld-type: https://example.com/ont/cargobike/orders#Price
+      x-jsonld-context:
+        ord: https://example.com/ont/cargobike/orders#
+        amount: ord:amount
+        currency: ord:currency
       properties:
-        amount: { type: number, format: float, x-semantic: ord:amount }
-        currency: { type: string, x-semantic: ord:currency }
+        amount: { type: number, format: float }
+        currency: { type: string }
       required: [amount, currency]
     Address:
       type: object
-      x-semantic: cus:Address
+      x-jsonld-type: https://example.com/ont/cargobike/customers#Address
+      x-jsonld-context:
+        cus: https://example.com/ont/cargobike/customers#
+        postalCode: cus:postalCode
+        countryCode: cus:countryCode
       properties:
-        postalCode: { type: string, x-semantic: cus:postalCode }
-        countryCode: { type: string, x-semantic: cus:countryCode }
+        postalCode: { type: string }
+        countryCode: { type: string }
     ShipmentQuote:
       type: object
-      x-semantic: shp:ShipmentQuote
+      x-jsonld-type: https://example.com/ont/cargobike/shipping#ShipmentQuote
+      x-jsonld-context:
+        shp: https://example.com/ont/cargobike/shipping#
+        cus: https://example.com/ont/cargobike/customers#
+        ord: https://example.com/ont/cargobike/orders#
+        cat: https://example.com/ont/cargobike/catalog#
+        shipsTo: shp:shipsTo
+        totalWeightKg: cat:hasWeightKg
+        hasTotalPrice: ord:hasTotalPrice
+        estimatedDays: shp:estimatedDays
       properties:
-        shipsTo: { $ref: '#/components/schemas/Address', x-semantic: shp:shipsTo }
-        totalWeightKg: { type: number, format: float, x-semantic: cat:hasWeightKg }
-        hasTotalPrice: { $ref: '#/components/schemas/Price', x-semantic: ord:hasTotalPrice }
-        estimatedDays: { type: integer, x-semantic: shp:estimatedDays }
+        shipsTo: { $ref: '#/components/schemas/Address' }
+        totalWeightKg: { type: number, format: float }
+        hasTotalPrice: { $ref: '#/components/schemas/Price' }
+        estimatedDays: { type: integer }
       required: [shipsTo, hasTotalPrice]

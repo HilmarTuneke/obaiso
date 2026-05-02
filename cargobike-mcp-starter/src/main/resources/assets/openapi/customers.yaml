@@ -3,9 +3,6 @@ openapi: 3.1.0
 info:
   title: Customers Service
   version: 1.0.0
-  x-semantic:
-    prefixes:
-      cus: https://example.com/ont/cargobike/customers#
 servers: [ { url: https://api.example.com } ]
 paths:
   /api/customers/{customerId}:
@@ -17,7 +14,8 @@ paths:
           name: customerId
           required: true
           schema: { type: string }
-          x-semantic: cus:customerId
+          x-jsonld-context:
+            customerId: https://example.com/ont/cargobike/customers#customerId
       responses:
         "200":
           description: OK
@@ -29,19 +27,31 @@ components:
   schemas:
     Address:
       type: object
-      x-semantic: cus:Address
+      x-jsonld-type: https://example.com/ont/cargobike/customers#Address
+      x-jsonld-context:
+        cus: https://example.com/ont/cargobike/customers#
+        street: cus:street
+        city: cus:city
+        postalCode: cus:postalCode
+        countryCode: cus:countryCode
       properties:
-        street: { type: string, x-semantic: cus:street }
-        city: { type: string, x-semantic: cus:city }
-        postalCode: { type: string, x-semantic: cus:postalCode }
-        countryCode: { type: string, x-semantic: cus:countryCode }
+        street: { type: string }
+        city: { type: string }
+        postalCode: { type: string }
+        countryCode: { type: string }
       required: [postalCode, countryCode]
     Customer:
       type: object
-      x-semantic: cus:Customer
+      x-jsonld-type: https://example.com/ont/cargobike/customers#Customer
+      x-jsonld-context:
+        cus: https://example.com/ont/cargobike/customers#
+        customerId: cus:customerId
+        fullName: cus:fullName
+        email: cus:email
+        hasAddress: cus:hasAddress
       properties:
-        customerId: { type: string, x-semantic: cus:customerId }
-        fullName: { type: string, x-semantic: cus:fullName }
-        email: { type: string, format: email, x-semantic: cus:email }
-        hasAddress: { $ref: '#/components/schemas/Address', x-semantic: cus:hasAddress }
+        customerId: { type: string }
+        fullName: { type: string }
+        email: { type: string, format: email }
+        hasAddress: { $ref: '#/components/schemas/Address' }
       required: [customerId]

@@ -3,11 +3,6 @@ openapi: 3.1.0
 info:
   title: Orders Service
   version: 1.0.0
-  x-semantic:
-    prefixes:
-      ord: https://example.com/ont/cargobike/orders#
-      cus: https://example.com/ont/cargobike/customers#
-      cat: https://example.com/ont/cargobike/catalog#
 servers: [ { url: https://api.example.com } ]
 paths:
   /api/orders/{orderId}:
@@ -19,7 +14,8 @@ paths:
           name: orderId
           required: true
           schema: { type: string }
-          x-semantic: ord:orderId
+          x-jsonld-context:
+            orderId: https://example.com/ont/cargobike/orders#orderId
       responses:
         "200":
           description: OK
@@ -31,36 +27,55 @@ components:
   schemas:
     Price:
       type: object
-      x-semantic: ord:Price
+      x-jsonld-type: https://example.com/ont/cargobike/orders#Price
+      x-jsonld-context:
+        ord: https://example.com/ont/cargobike/orders#
+        amount: ord:amount
+        currency: ord:currency
       properties:
-        amount: { type: number, format: float, x-semantic: ord:amount }
-        currency: { type: string, x-semantic: ord:currency }
+        amount: { type: number, format: float }
+        currency: { type: string }
       required: [amount, currency]
     OrderItem:
       type: object
-      x-semantic: ord:OrderItem
+      x-jsonld-type: https://example.com/ont/cargobike/orders#OrderItem
+      x-jsonld-context:
+        cat: https://example.com/ont/cargobike/catalog#
+        ord: https://example.com/ont/cargobike/orders#
+        sku: cat:hasSku
+        quantity: ord:quantity
       properties:
-        sku: { type: string, x-semantic: cat:hasSku }
-        quantity: { type: integer, x-semantic: ord:quantity }
+        sku: { type: string }
+        quantity: { type: integer }
         unitPrice: { $ref: '#/components/schemas/Price' }
       required: [sku, quantity]
     Customer:
       type: object
-      x-semantic: cus:Customer
+      x-jsonld-type: https://example.com/ont/cargobike/customers#Customer
+      x-jsonld-context:
+        cus: https://example.com/ont/cargobike/customers#
+        customerId: cus:customerId
+        email: cus:email
       properties:
-        customerId: { type: string, x-semantic: cus:customerId }
-        email: { type: string, format: email, x-semantic: cus:email }
+        customerId: { type: string }
+        email: { type: string, format: email }
       required: [customerId]
     Order:
       type: object
-      x-semantic: ord:Order
+      x-jsonld-type: https://example.com/ont/cargobike/orders#Order
+      x-jsonld-context:
+        ord: https://example.com/ont/cargobike/orders#
+        orderId: ord:orderId
+        hasStatus: ord:hasStatus
+        orderedBy: ord:orderedBy
+        hasItem: ord:hasItem
+        hasTotalPrice: ord:hasTotalPrice
       properties:
-        orderId: { type: string, x-semantic: ord:orderId }
-        hasStatus: { type: string, x-semantic: ord:hasStatus }
-        orderedBy: { $ref: '#/components/schemas/Customer', x-semantic: ord:orderedBy }
+        orderId: { type: string }
+        hasStatus: { type: string }
+        orderedBy: { $ref: '#/components/schemas/Customer' }
         hasItem:
           type: array
           items: { $ref: '#/components/schemas/OrderItem' }
-          x-semantic: ord:hasItem
-        hasTotalPrice: { $ref: '#/components/schemas/Price', x-semantic: ord:hasTotalPrice }
+        hasTotalPrice: { $ref: '#/components/schemas/Price' }
       required: [orderId, orderedBy]
