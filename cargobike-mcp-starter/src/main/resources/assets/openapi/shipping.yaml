@@ -3,7 +3,12 @@ openapi: 3.1.0
 info:
   title: Shipping Service
   version: 1.0.0
-  x-semantic: { base: https://example.com/ont/cargobike# }
+  x-semantic:
+    prefixes:
+      shp: https://example.com/ont/cargobike/shipping#
+      cus: https://example.com/ont/cargobike/customers#
+      ord: https://example.com/ont/cargobike/orders#
+      cat: https://example.com/ont/cargobike/catalog#
 servers: [ { url: https://api.example.com } ]
 paths:
   /api/shipping/quote:
@@ -28,29 +33,29 @@ components:
     QuoteRequest:
       type: object
       properties:
-        postalCode: { type: string, x-semantic: cb:postalCode }
-        countryCode: { type: string, x-semantic: cb:countryCode }
-        weightKg: { type: number, format: float, x-semantic: cb:hasWeightKg }
+        postalCode: { type: string, x-semantic: cus:postalCode }
+        countryCode: { type: string, x-semantic: cus:countryCode }
+        weightKg: { type: number, format: float, x-semantic: cat:hasWeightKg }
       required: [postalCode, weightKg]
     Price:
       type: object
-      x-semantic: cb:Price
+      x-semantic: ord:Price
       properties:
-        amount: { type: number, format: float, x-semantic: cb:amount }
-        currency: { type: string, x-semantic: cb:currency }
+        amount: { type: number, format: float, x-semantic: ord:amount }
+        currency: { type: string, x-semantic: ord:currency }
       required: [amount, currency]
     Address:
       type: object
-      x-semantic: cb:Address
+      x-semantic: cus:Address
       properties:
-        postalCode: { type: string, x-semantic: cb:postalCode }
-        countryCode: { type: string, x-semantic: cb:countryCode }
+        postalCode: { type: string, x-semantic: cus:postalCode }
+        countryCode: { type: string, x-semantic: cus:countryCode }
     ShipmentQuote:
       type: object
-      x-semantic: cb:ShipmentQuote
+      x-semantic: shp:ShipmentQuote
       properties:
-        shipsTo: { $ref: '#/components/schemas/Address', x-semantic: cb:shipsTo }
-        totalWeightKg: { type: number, format: float, x-semantic: cb:hasWeightKg }
-        hasTotalPrice: { $ref: '#/components/schemas/Price', x-semantic: cb:hasTotalPrice }
-        estimatedDays: { type: integer, x-semantic: cb:estimatedDays }
+        shipsTo: { $ref: '#/components/schemas/Address', x-semantic: shp:shipsTo }
+        totalWeightKg: { type: number, format: float, x-semantic: cat:hasWeightKg }
+        hasTotalPrice: { $ref: '#/components/schemas/Price', x-semantic: ord:hasTotalPrice }
+        estimatedDays: { type: integer, x-semantic: shp:estimatedDays }
       required: [shipsTo, hasTotalPrice]

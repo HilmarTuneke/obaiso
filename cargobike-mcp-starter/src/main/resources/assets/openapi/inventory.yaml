@@ -3,7 +3,10 @@ openapi: 3.1.0
 info:
   title: Inventory Service
   version: 1.0.0
-  x-semantic: { base: https://example.com/ont/cargobike# }
+  x-semantic:
+    prefixes:
+      inv: https://example.com/ont/cargobike/inventory#
+      cat: https://example.com/ont/cargobike/catalog#
 servers: [ { url: https://api.example.com } ]
 paths:
   /api/inventory/{sku}:
@@ -15,7 +18,7 @@ paths:
           name: sku
           required: true
           schema: { type: string }
-          x-semantic: cb:hasSku
+          x-semantic: cat:hasSku
       responses:
         "200":
           description: OK
@@ -27,9 +30,9 @@ components:
   schemas:
     InventoryItem:
       type: object
-      x-semantic: cb:InventoryItem
+      x-semantic: inv:InventoryItem
       properties:
-        sku: { type: string, x-semantic: cb:hasSku }
-        hasQuantity: { type: integer, x-semantic: cb:hasQuantity }
-        warehouseCode: { type: string, x-semantic: cb:warehouseCode }
+        sku: { type: string, x-semantic: cat:hasSku }
+        hasQuantity: { type: integer, x-semantic: inv:hasQuantity }
+        warehouseCode: { type: string, x-semantic: inv:warehouseCode }
       required: [sku, hasQuantity]

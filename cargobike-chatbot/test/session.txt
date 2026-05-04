@@ -5,30 +5,30 @@ You: What bikes do You have?
   [tool] listCargoBikes({})
 
   ┌─ Reasoning trace ────────────────────────────────────
-  │  Intent   : List all available cargo bikes in the store catalog.
-  │  Concepts : https://example.com/ont/cargobike#CargoBike, https://example.com/ont/cargobike#EbikeCargoBike, https://example.com/ont/cargobike#hasSku, https://example.com/ont/cargobike#modelName, https://example.com/ont/cargobike#hasWeightKg, https://example.com/ont/cargobike#hasMaxPayloadKg, https://example.com/ont/cargobike#hasWheelCount, https://example.com/ont/cargobike#hasBatteryCapacityWh
-  │  Inferred : https://example.com/ont/cargobike#EbikeCargoBike rdfs:subClassOf https://example.com/ont/cargobike#CargoBike
-  │  Tool     : listCargoBikes — justified by https://example.com/ont/cargobike#CargoBike
+  │  Intent   : List all available cargo bike models in the store.
+  │  Concepts : cat:CargoBike, cat:EbikeCargoBike, cat:hasSku, cat:modelName, cat:hasWeightKg, cat:hasMaxPayloadKg, cat:hasWheelCount, cat:hasBatteryCapacityWh
+  │  Inferred : cat:EbikeCargoBike rdfs:subClassOf cat:CargoBike
+  │  Tool     : listCargoBikes — justified by cat:CargoBike — user is asking for all available bike models in the catalog
   └──────────────────────────────────────────────────────
 
-Assistant: We currently carry **3 bikes** in our catalog:
+Assistant: We currently carry **3 cargo bike models**:
 
 ---
 
 ### 🚲 1. CargoMaster 500
 - **SKU:** SKU-CB-001
-- **Type:** Cargo Bike
+- **Type:** Standard Cargo Bike
 - **Wheels:** 2
-- **Bike Weight:** 38.5 kg
+- **Weight:** 38.5 kg
 - **Max Payload:** 200 kg
 
 ---
 
 ### ⚡ 2. E-Cargo Pro
 - **SKU:** SKU-ECB-900
-- **Type:** Electric Cargo Bike (E-Bike)
+- **Type:** E-Cargo Bike (electrically assisted)
 - **Wheels:** 3
-- **Bike Weight:** 42.0 kg
+- **Weight:** 42.0 kg
 - **Max Payload:** 220 kg
 - **Battery Capacity:** 750 Wh
 
@@ -36,47 +36,47 @@ Assistant: We currently carry **3 bikes** in our catalog:
 
 ### 🚲 3. UrbanHauler 300
 - **SKU:** SKU-CB-002
-- **Type:** Cargo Bike
+- **Type:** Standard Cargo Bike
 - **Wheels:** 2
-- **Bike Weight:** 34.0 kg
+- **Weight:** 34.0 kg
 - **Max Payload:** 150 kg
 
 ---
 
-Would you like more details on any of these bikes, such as availability, pricing, or shipping costs? 😊
+Would you like more details on any of these bikes, such as availability or shipping costs?
 
 You: How many E-Cargo Pros are in stock?
   [tool] listCargoBikes({})
   [tool] getInventoryBySku({"sku": "SKU-ECB-900"})
 
   ┌─ Reasoning trace ────────────────────────────────────
-  │  Intent   : Find out how many E-Cargo Pro bikes are currently in stock.
-  │  Concepts : cb:EbikeCargoBike, cb:CargoBike, cb:InventoryItem, cb:hasSku, cb:hasQuantity, cb:warehouseCode
-  │  Inferred : cb:EbikeCargoBike rdfs:subClassOf cb:CargoBike
-  │  Tool     : listCargoBikes — justified by cb:CargoBike — used to locate the SKU for the E-Cargo Pro model, leveraging the cb:EbikeCargoBike subClassOf cb:CargoBike inference
-  │  Tool     : getInventoryBySku — justified by cb:InventoryItem — used to retrieve current stock level via cb:hasSku (SKU-ECB-900)
+  │  Intent   : Check the current stock level of the E-Cargo Pro model.
+  │  Concepts : cat:EbikeCargoBike, cat:CargoBike, cat:hasSku, inv:InventoryItem, inv:hasQuantity, inv:warehouseCode
+  │  Inferred : cat:EbikeCargoBike rdfs:subClassOf cat:CargoBike
+  │  Tool     : listCargoBikes — justified by cat:CargoBike — used to discover the SKU for the E-Cargo Pro (cat:EbikeCargoBike, a subclass of cat:CargoBike)
+  │  Tool     : getInventoryBySku — justified by inv:InventoryItem — retrieves stock quantity (inv:hasQuantity) for a given cat:hasSku
   └──────────────────────────────────────────────────────
 
-Assistant: There are currently **3 E-Cargo Pros** in stock (SKU: SKU-ECB-900), held at warehouse NUE-01.
+Assistant: There are currently **3 E-Cargo Pros** in stock (SKU: SKU-ECB-900), held in warehouse NUE-01.
 
 You: What's the status of ORD-1001?
   [tool] getOrder({"orderId": "ORD-1001"})
 
   ┌─ Reasoning trace ────────────────────────────────────
   │  Intent   : Check the status of order ORD-1001.
-  │  Concepts : https://example.com/ont/cargobike#Order, https://example.com/ont/cargobike#orderId, https://example.com/ont/cargobike#hasStatus
-  │  Tool     : getOrder — justified by cb:Order identified by cb:orderId, with cb:hasStatus describing its lifecycle state.
+  │  Concepts : ord:Order, ord:orderId, ord:hasStatus
+  │  Tool     : getOrder — justified by ord:orderId — the user provided an order ID matching the pattern ORD-[0-9]+, and getOrder operatesOn ord:Order, returning ord:Order with its ord:hasStatus property.
   └──────────────────────────────────────────────────────
 
-Assistant: I'm sorry, but I couldn't find any order with the ID **ORD-1001**. It's possible that the order ID might be incorrect or the order doesn't exist in our system. Could you double-check the order ID and try again? Order IDs typically follow the format **ORD-{number}** (e.g., ORD-1002).
+Assistant: I'm sorry, but I wasn't able to find any order with the ID **ORD-1001**. It's possible that the order ID is incorrect or doesn't exist in our system. Could you double-check the order ID and try again? If you need further help, feel free to provide more details!
 
 You: What's the status of ORD-002?
   [tool] getOrder({"orderId": "ORD-002"})
 
   ┌─ Reasoning trace ────────────────────────────────────
   │  Intent   : Check the current status of order ORD-002.
-  │  Concepts : https://example.com/ont/cargobike#Order, https://example.com/ont/cargobike#orderId, https://example.com/ont/cargobike#hasStatus
-  │  Tool     : getOrder — justified by https://example.com/ont/cargobike#Order — the user provided an cb:orderId value, and getOrder operates on cb:Order to return its cb:hasStatus property.
+  │  Concepts : ord:Order, ord:orderId, ord:hasStatus
+  │  Tool     : getOrder — justified by ord:Order identified by ord:orderId, with ord:hasStatus property returning the lifecycle status.
   └──────────────────────────────────────────────────────
 
 Assistant: Order ORD-002 has been **SHIPPED**! 🚚
@@ -90,29 +90,29 @@ Here's a quick summary:
 
 Let me know if you need any more details about this order!
 
-You: How much does it cost to ship 34 kg to postal code 80331?
+You: How much does it cost to ship 34 kg to 80331?
   [tool] getShipmentQuote({"postalCode": "80331", "weightKg": 34})
 
   ┌─ Reasoning trace ────────────────────────────────────
-  │  Intent   : Get a shipping cost quote for 34 kg to postal code 80331.
-  │  Concepts : https://example.com/ont/cargobike#ShipmentQuote, https://example.com/ont/cargobike#Address, https://example.com/ont/cargobike#hasWeightKg, https://example.com/ont/cargobike#postalCode, https://example.com/ont/cargobike#hasTotalPrice, https://example.com/ont/cargobike#estimatedDays
-  │  Tool     : getShipmentQuote — justified by https://example.com/ont/cargobike#ShipmentQuote — the tool returns a cb:ShipmentQuote for a given weight (cb:hasWeightKg) and destination (cb:postalCode)
+  │  Intent   : Get a shipping cost quote for a 34 kg shipment to postal code 80331.
+  │  Concepts : shp:ShipmentQuote, cus:Address, cus:postalCode, cat:hasWeightKg, ord:hasTotalPrice, shp:estimatedDays
+  │  Tool     : getShipmentQuote — justified by shp:ShipmentQuote — the tool computes delivery cost and estimated lead time for a given cus:postalCode and cat:hasWeightKg
   └──────────────────────────────────────────────────────
 
-Assistant: Shipping 34 kg to postal code 80331 (Germany) would cost **€66.70**, with an estimated delivery time of **3 business days**.
+Assistant: Shipping 34 kg to postal code 80331 (Munich, DE) would cost **€66.70**, with an estimated delivery time of **3 days**.
 
-You: How much does it cost to ship SKU-CB-002 to postal code 80331?
+You: How much does it cost to ship SKU-CB-002 to 80331?
   [tool] getBikeBySku({"sku": "SKU-CB-002"})
   [tool] getShipmentQuote({"postalCode": "80331", "weightKg": 34.0})
 
   ┌─ Reasoning trace ────────────────────────────────────
-  │  Intent   : Get the shipping cost for cargo bike SKU-CB-002 to postal code 80331.
-  │  Concepts : cb:CargoBike, cb:hasSku, cb:hasWeightKg, cb:ShipmentQuote, cb:hasTotalPrice, cb:postalCode, cb:estimatedDays
-  │  Tool     : getBikeBySku — justified by cb:hasSku — needed to look up the bike's cb:hasWeightKg, which is a required input for the shipment quote.
-  │  Tool     : getShipmentQuote — justified by cb:ShipmentQuote — directly models a shipping cost estimate given cb:postalCode and cb:hasWeightKg.
+  │  Intent   : Find the shipping cost for SKU-CB-002 to postal code 80331.
+  │  Concepts : cat:CargoBike, cat:hasSku, cat:hasWeightKg, cus:postalCode, shp:ShipmentQuote, ord:hasTotalPrice
+  │  Tool     : getBikeBySku — justified by cat:hasSku — needed to retrieve the bike's cat:hasWeightKg, which is required as input for the shipment quote
+  │  Tool     : getShipmentQuote — justified by shp:ShipmentQuote — directly models a shipment cost estimate based on cus:postalCode and cat:hasWeightKg
   └──────────────────────────────────────────────────────
 
-Assistant: Shipping the **UrbanHauler 300 (SKU-CB-002)** to postal code **80331 (DE)** would cost **€66.70**, with an estimated delivery time of **3 business days**. This is based on the bike's weight of 34 kg.
+Assistant: Shipping the **UrbanHauler 300** (SKU-CB-002) to postal code **80331** (Munich, DE) would cost **€66.70**, with an estimated delivery time of **3 business days**. The quote is based on the bike's weight of 34 kg.
 
 You: Are there orders for bikes out of stock?
   [tool] listOrders({})
@@ -122,27 +122,25 @@ You: Are there orders for bikes out of stock?
   [tool] getInventoryBySku({"sku": "SKU-CB-002"})
 
   ┌─ Reasoning trace ────────────────────────────────────
-  │  Intent   : Find out if any orders exist for bikes that are currently out of stock.
-  │  Concepts : https://example.com/ont/cargobike#Order, https://example.com/ont/cargobike#OrderItem, https://example.com/ont/cargobike#CargoBike, https://example.com/ont/cargobike#InventoryItem, https://example.com/ont/cargobike#hasSku, https://example.com/ont/cargobike#hasStatus, https://example.com/ont/cargobike#quantity
-  │  Inferred : https://example.com/ont/cargobike#EbikeCargoBike rdfs:subClassOf https://example.com/ont/cargobike#CargoBike
-  │  Tool     : listOrders — justified by https://example.com/ont/cargobike#Order — needed to get all active orders and their associated cb:OrderItem SKUs
-  │  Tool     : listCargoBikes — justified by https://example.com/ont/cargobike#CargoBike — needed to enumerate all bikes and match SKUs from orders
-  │  Tool     : getInventoryBySku — justified by https://example.com/ont/cargobike#InventoryItem — needed to check cb:hasQuantity for each SKU found in orders
+  │  Intent   : Find orders that contain bikes which are currently out of stock.
+  │  Concepts : ord:Order, ord:OrderItem, cat:hasSku, inv:InventoryItem, inv:hasQuantity, cat:CargoBike, cat:EbikeCargoBike
+  │  Inferred : cat:EbikeCargoBike rdfs:subClassOf cat:CargoBike
+  │  Tool     : listOrders — justified by ord:Order — retrieve all active orders to inspect their line items
+  │  Tool     : listCargoBikes — justified by cat:CargoBike — retrieve all bikes to map SKUs referenced in orders
+  │  Tool     : getInventoryBySku — justified by inv:InventoryItem — check inv:hasQuantity per SKU found in orders to detect out-of-stock bikes
   └──────────────────────────────────────────────────────
 
-Assistant: Yes! There is one order for an out-of-stock bike:
+Assistant: Yes — there is **one order for an out-of-stock bike**:
 
-| Order | Status | Bike | SKU | Qty Ordered | Stock Available |
-|-------|--------|------|-----|-------------|----------------|
-| ORD-003 | PAID | UrbanHauler 300 | SKU-CB-002 | 1 | **0 (Out of Stock)** |
-
-Order **ORD-003** (placed by customer BLUBB-789, lars@example.com) is in **PAID** status and includes 1× UrbanHauler 300 (SKU-CB-002), but there are currently **0 units** in stock at warehouse NUE-01.
+| Order | Status | Customer | Bike (SKU) | Model | Qty Ordered | Stock |
+|-------|--------|----------|------------|-------|-------------|-------|
+| **ORD-003** | PAID | lars@example.com | SKU-CB-002 | UrbanHauler 300 | 1 | **0 (out of stock)** |
 
 The other two orders are fine:
-- **ORD-001** (E-Cargo Pro, SKU-ECB-900): 3 units in stock ✅
-- **ORD-002** (CargoMaster 500, SKU-CB-001): 7 units in stock ✅
+- **ORD-001** (SKU-ECB-900 – E-Cargo Pro): 3 units in stock ✅
+- **ORD-002** (SKU-CB-001 – CargoMaster 500): 7 units in stock ✅
 
-You may want to prioritize restocking SKU-CB-002 or contact the customer about the delay.
+Order **ORD-003** is currently **PAID** but the **UrbanHauler 300 (SKU-CB-002)** has **0 units** available in warehouse NUE-01. You may want to contact the customer (lars@example.com) or trigger a replenishment.
 
 You: Give me details about BLUBB-123
   [tool] getCustomer({"customerId": "BLUBB-123"})
@@ -166,38 +164,25 @@ Assistant: Here are the details for customer **BLUBB-123**:
 Let me know if there's anything else you'd like to know about this customer!
 
 You: Give me all orders from BLUBB-123
-  [tool] listOrders({})
   [tool] getCustomer({"customerId": "BLUBB-123"})
 
   ┌─ Reasoning trace ────────────────────────────────────
-  │  Intent   : List all orders placed by customer BLUBB-123.
-  │  Concepts : https://example.com/ont/cargobike#Order, https://example.com/ont/cargobike#Customer, https://example.com/ont/cargobike#orderedBy, https://example.com/ont/cargobike#customerId, https://example.com/ont/cargobike#orderId, https://example.com/ont/cargobike#hasStatus, https://example.com/ont/cargobike#hasTotalPrice
-  │  Tool     : listOrders — justified by cb:Order — needed to retrieve all orders so they can be filtered by cb:orderedBy → cb:customerId
-  │  Tool     : getCustomer — justified by cb:Customer / cb:customerId — fetches customer details to confirm identity and enrich the response
+  │  Intent   : Retrieve details about the customer with ID BLUBB-123.
+  │  Concepts : cus:Customer, cus:customerId, cus:fullName, cus:email, cus:hasAddress, cus:Address, cus:street, cus:city, cus:postalCode, cus:countryCode
+  │  Tool     : getCustomer — justified by cus:customerId — the user provided a value matching the pattern BLUBB-[0-9]+, which is the owl:hasKey of cus:Customer
   └──────────────────────────────────────────────────────
 
-Assistant: Here are the orders for **Alex Müller** (BLUBB-123, alex@example.com):
+Assistant: Here are the details for customer **BLUBB-123**:
 
-| Order ID | Status | Item SKU | Qty | Unit Price | Total |
-|----------|--------|----------|-----|------------|-------|
-| ORD-001 | PROCESSING | SKU-ECB-900 | 1 | €4,299.00 | **€4,299.00** |
+| Field | Value |
+|---|---|
+| **Name** | Alex Müller |
+| **Email** | alex@example.com |
+| **Street** | Hauptstraße 1 |
+| **City** | Nürnberg |
+| **Postal Code** | 90402 |
+| **Country** | DE (Germany) |
 
-Alex currently has **1 order**:
-- **ORD-001** is in **PROCESSING** status, containing 1× SKU-ECB-900 for a total of **€4,299.00 EUR**.
-
-Let me know if you'd like more details on this order or the bike!
-
-You: How much does it cost to ship SKU-CB-002 to 80331?
-  [tool] getBikeBySku({"sku": "SKU-CB-002"})
-  [tool] getShipmentQuote({"postalCode": "80331", "weightKg": 34.0})
-
-  ┌─ Reasoning trace ────────────────────────────────────
-  │  Intent   : Find out the shipping cost for cargo bike SKU-CB-002 to postal code 80331.
-  │  Concepts : cb:CargoBike, cb:hasSku, cb:hasWeightKg, cb:ShipmentQuote, cb:hasTotalPrice, cb:Price, cb:postalCode, cb:Address
-  │  Tool     : getBikeBySku — justified by cb:hasSku — needed to retrieve the cb:CargoBike instance and its cb:hasWeightKg for the shipment quote calculation.
-  │  Tool     : getShipmentQuote — justified by cb:ShipmentQuote / cb:postalCode — used to compute the delivery cost and estimated transit time based on the bike's weight and destination postal code.
-  └──────────────────────────────────────────────────────
-
-Assistant: Shipping the **UrbanHauler 300** (SKU-CB-002) to postal code **80331** (Munich, DE) will cost **€66.70**, with an estimated delivery time of **3 days**. The quote is based on the bike's weight of 34 kg.
+Let me know if you need anything else for this customer!
 
 You: quit

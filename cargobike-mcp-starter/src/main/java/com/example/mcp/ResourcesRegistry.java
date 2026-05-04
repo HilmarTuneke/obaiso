@@ -9,9 +9,14 @@ import java.util.stream.Stream;
 public class ResourcesRegistry {
     private static final String ASSETS_ROOT = "assets/";
 
-    public Map<String, Object> list() throws IOException {
+    public Map<String, Object> list() {
         List<Map<String, String>> items = Stream.of(
             "ontology/cargobike.ttl",
+            "ontology/catalog.ttl",
+            "ontology/customers.ttl",
+            "ontology/inventory.ttl",
+            "ontology/orders.ttl",
+            "ontology/shipping.ttl",
             "openapi/catalog.yaml",
             "openapi/orders.yaml",
             "openapi/customers.yaml",
