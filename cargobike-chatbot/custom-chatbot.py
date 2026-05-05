@@ -31,65 +31,6 @@ _ONTOLOGY_FILES = ["catalog.ttl", "customers.ttl", "inventory.ttl", "orders.ttl"
 
 MCP_JAR = _PARENT / "cargobike-mcp-starter/target/quarkus-app/quarkus-run.jar"
 
-OUTPUT_SCHEMA = {
-    "format": {
-        "type": "json_schema",
-        "schema": {
-            "type": "object",
-            "description": "Structured response containing explainability reasoning and a user-facing answer.",
-            "properties": {
-                "reasoning": {
-                    "type": "object",
-                    "description": "Explainability artifact tracing how the answer was derived from ontology concepts and tool calls.",
-                    "properties": {
-                        "user_intent": {
-                            "type": "string",
-                            "description": "One-line summary of what the user is asking."
-                        },
-                        "mapped_concepts": {
-                            "type": "array",
-                            "description": "Ontology URIs or concept names (e.g. cat:CargoBike) used to interpret the request.",
-                            "items": {"type": "string"}
-                        },
-                        "inferences_used": {
-                            "type": "array",
-                            "description": "RDFS/OWL inferences applied (e.g. 'cat:EbikeCargoBike rdfs:subClassOf cat:CargoBike'). Empty list if none.",
-                            "items": {"type": "string"}
-                        },
-                        "tools_selected": {
-                            "type": "array",
-                            "description": "Each tool that was called, with the ontology concept that justifies its selection.",
-                            "items": {
-                                "type": "object",
-                                "properties": {
-                                    "tool": {
-                                        "type": "string",
-                                        "description": "Name of the MCP tool that was called."
-                                    },
-                                    "justified_by": {
-                                        "type": "string",
-                                        "description": "Ontology concept or property that motivated choosing this tool."
-                                    }
-                                },
-                                "required": ["tool", "justified_by"],
-                                "additionalProperties": False
-                            }
-                        }
-                    },
-                    "required": ["user_intent", "mapped_concepts", "inferences_used", "tools_selected"],
-                    "additionalProperties": False
-                },
-                "answer": {
-                    "type": "string",
-                    "description": "Friendly plain-language answer to the user's question."
-                }
-            },
-            "required": ["reasoning", "answer"],
-            "additionalProperties": False
-        }
-    }
-}
-
 
 def build_system_prompt(ontology: str) -> str:
     return f"""\
@@ -152,6 +93,74 @@ def _parse_structured_response(text: str) -> tuple[dict | None, str]:
     return None, text
 
 
+def _extract_semantic(description: str) -> dict | None:
+    """Extract x-semantic annotation from a tool description string."""
+    m = re.search(r'\[x-semantic:\s*ontology=(\S+?),\s*operatesOn=(\S+?),\s*returns=(\S+?)\]', description)
+    if m:
+        return {"ontology": m.group(1), "operatesOn": m.group(2), "returns": m.group(3)}
+    return None
+
+
+# Subclass inferences extracted from the ontology TTL files at startup.
+# Maps superclass short name → [(subClass, superPrefix, subPrefix)].
+_ONTOLOGY_INFERENCES: dict[str, list[tuple[str, str, str]]] = {}
+
+
+def _scan_ontology_inferences() -> dict[str, list[tuple[str, str, str]]]:
+    """Parse ontology TTL files for rdfs:subClassOf relationships between domain concepts."""
+    result: dict[str, list[tuple[str, str, str]]] = {}
+    for ttl_file in _ONTOLOGY_FILES:
+        path = _ONTOLOGY_DIR / ttl_file
+        try:
+            text = path.read_text(encoding="utf-8")
+        except FileNotFoundError:
+            continue
+        for m in re.finditer(
+                r'([\w-]+):(\w+)\s+a\s+rdfs:Class\s*;\s*rdfs:subClassOf\s+([\w-]+):(\w+)',
+                text,
+                re.MULTILINE,
+        ):
+            subPrefix, subClass, supPrefix, superClass = m.groups()
+            result.setdefault(superClass, []).append((subClass, supPrefix, subPrefix))
+    return result
+
+
+_ONTOLOGY_INFERENCES = _scan_ontology_inferences()
+
+
+def _build_reasoning(messages: list[dict], openai_tools: list[dict], user_input: str) -> dict | None:
+    """Construct a reasoning trace from the tool calls that actually occurred."""
+    tool_map = {t["function"]["name"]: t for t in openai_tools}
+    tools_selected = []
+    concepts: list[str] = []
+    for msg in messages:
+        if msg.get("role") == "assistant" and msg.get("tool_calls"):
+            for tc in msg["tool_calls"]:
+                name = tc["function"]["name"]
+                sem = _extract_semantic(tool_map.get(name, {}).get("function", {}).get("description", ""))
+                entry = {"tool": name}
+                if sem:
+                    entry[
+                        "justified_by"] = f"{sem['ontology']} — tool operatesOn {sem['operatesOn']}, returns {sem['returns']}"
+                    for uri in (sem["ontology"], sem["operatesOn"], sem["returns"]):
+                        if uri and uri not in concepts:
+                            concepts.append(uri)
+                tools_selected.append(entry)
+    if not tools_selected:
+        return None
+    inferences: list[str] = []
+    for sup, subs in _ONTOLOGY_INFERENCES.items():
+        for subClass, supPrefix, subPrefix in subs:
+            if any(subClass in c or sup in c for c in concepts):
+                inferences.append(f"{subPrefix}:{subClass} rdfs:subClassOf {supPrefix}:{sup}")
+    return {
+        "user_intent": user_input,
+        "mapped_concepts": concepts,
+        "inferences_used": inferences,
+        "tools_selected": tools_selected,
+    }
+
+
 def _print_reasoning(reasoning: dict) -> None:
     print("\n  ┌─ Reasoning trace ────────────────────────────────────")
     if intent := reasoning.get("user_intent"):
@@ -173,6 +182,7 @@ async def run_agent(
         messages: list[dict],
         client: OpenAI,
         model: str,
+        user_input: str,
 ) -> str:
     """Drive an agentic tool-use loop with Generative Engine."""
     while True:
@@ -185,7 +195,6 @@ async def run_agent(
         )
 
         message = response.choices[0].message
-
         if message.tool_calls:
             messages.append({
                 "role": "assistant",
@@ -224,6 +233,8 @@ async def run_agent(
         else:
             raw = message.content or ""
             reasoning, answer = _parse_structured_response(raw)
+            if reasoning is None:
+                reasoning = _build_reasoning(messages, openai_tools, user_input)
             if reasoning:
                 _print_reasoning(reasoning)
             return answer
@@ -293,7 +304,7 @@ async def main() -> None:
                     {"role": "user", "content": user_input}
                 ]
                 answer = await run_agent(
-                    session, openai_tools, messages, client, model
+                    session, openai_tools, messages, client, model, user_input
                 )
                 print(f"\nAssistant: {answer}\n")
 

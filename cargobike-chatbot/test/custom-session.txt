@@ -1,0 +1,265 @@
+Cargo Bike Assistant
+Type your question, or 'quit' to exit.
+
+You: What bikes do You have?
+  [tool] listCargoBikes({})
+
+  ┌─ Reasoning trace ────────────────────────────────────
+  │  Intent   : What bikes do You have?
+  │  Concepts : https://example.com/ont/cargobike, cat:CargoBike
+  │  Inferred : cat:CargoBike rdfs:subClassOf dbo:Bicycle
+  │  Inferred : cat:EbikeCargoBike rdfs:subClassOf cat:CargoBike
+  │  Tool     : listCargoBikes — justified by https://example.com/ont/cargobike — tool operatesOn cat:CargoBike, returns cat:CargoBike
+  └──────────────────────────────────────────────────────
+
+Assistant: Here's our current cargo bike lineup! 🚲
+
+---
+
+### 1. 🚲 CargoMaster 500
+| Feature | Details |
+|---|---|
+| **SKU** | SKU-CB-001 |
+| **Type** | Cargo Bike |
+| **Wheels** | 2 |
+| **Bike Weight** | 38.5 kg |
+| **Max Payload** | 200 kg |
+
+---
+
+### 2. ⚡ E-Cargo Pro
+| Feature | Details |
+|---|---|
+| **SKU** | SKU-ECB-900 |
+| **Type** | E-Cargo Bike (Electric) |
+| **Wheels** | 3 |
+| **Bike Weight** | 42.0 kg |
+| **Max Payload** | 220 kg |
+| **Battery Capacity** | 750 Wh |
+
+---
+
+### 3. 🚲 UrbanHauler 300
+| Feature | Details |
+|---|---|
+| **SKU** | SKU-CB-002 |
+| **Type** | Cargo Bike |
+| **Wheels** | 2 |
+| **Bike Weight** | 34.0 kg |
+| **Max Payload** | 150 kg |
+
+---
+
+We offer **two classic cargo bikes** and **one electric cargo bike**. The **E-Cargo Pro** is our most capable model with the highest payload (220 kg) and electric assist, while the **UrbanHauler 300** is the lightest option. Would you like more details on any of these, such as availability or shipping costs?
+
+You: How many E-Cargo Pros are in stock?
+  [tool] listCargoBikes({})
+  [tool] queryOntology({"sparql": "\nPREFIX cat: <https://example.com/ont/cargobike/catalog#>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nSELECT ?class ?label WHERE {\n  ?class rdfs:subClassOf* cat:CargoBike ;\n         rdfs:label ?label .\n}\n"})
+  [tool] getInventoryBySku({"sku": "SKU-ECB-900"})
+
+  ┌─ Reasoning trace ────────────────────────────────────
+  │  Intent   : How many E-Cargo Pros are in stock?
+  │  Concepts : https://example.com/ont/cargobike, cat:CargoBike, inv:InventoryItem
+  │  Inferred : cat:CargoBike rdfs:subClassOf dbo:Bicycle
+  │  Inferred : cat:EbikeCargoBike rdfs:subClassOf cat:CargoBike
+  │  Tool     : listCargoBikes — justified by https://example.com/ont/cargobike — tool operatesOn cat:CargoBike, returns cat:CargoBike
+  │  Tool     : queryOntology — justified by None
+  │  Tool     : getInventoryBySku — justified by https://example.com/ont/cargobike — tool operatesOn cat:CargoBike, returns inv:InventoryItem
+  └──────────────────────────────────────────────────────
+
+Assistant: There are **3 E-Cargo Pros** currently in stock, held at warehouse **NUE-01**.
+
+Here's a quick summary:
+| Model | SKU | Type | In Stock | Warehouse |
+|---|---|---|---|---|
+| E-Cargo Pro | SKU-ECB-900 | E-Cargo Bike | **3** | NUE-01 |
+
+Let me know if you'd like to place an order or need any other details! 🚲⚡
+
+You: What's the status of ORD-1001?
+  [tool] getOrder({"orderId": "ORD-1001"})
+
+  ┌─ Reasoning trace ────────────────────────────────────
+  │  Intent   : What's the status of ORD-1001?
+  │  Concepts : https://example.com/ont/cargobike, ord:Order
+  │  Tool     : getOrder — justified by https://example.com/ont/cargobike — tool operatesOn ord:Order, returns ord:Order
+  └──────────────────────────────────────────────────────
+
+Assistant: It looks like no order was found with the ID **ORD-1001**. This could mean:
+
+- The order ID might be incorrect or mistyped.
+- The order may not exist in our system.
+
+Could you double-check the order ID and try again? Order IDs follow the format **ORD-** followed by numbers (e.g., `ORD-1234`). If you have a different order number, I'm happy to look it up for you!
+
+You: What's the status of ORD-002?
+  [tool] getOrder({"orderId": "ORD-002"})
+
+  ┌─ Reasoning trace ────────────────────────────────────
+  │  Intent   : What's the status of ORD-002?
+  │  Concepts : https://example.com/ont/cargobike, ord:Order
+  │  Tool     : getOrder — justified by https://example.com/ont/cargobike — tool operatesOn ord:Order, returns ord:Order
+  └──────────────────────────────────────────────────────
+
+Assistant: Here's the current status of order **ORD-002**:
+
+- **Status:** ✅ SHIPPED
+- **Ordered by:** maria@example.com (Customer ID: BLUBB-456)
+- **Items:** 2× SKU-CB-001 @ €1,899.00 each
+- **Total Price:** €3,798.00
+
+The order has already been shipped! Is there anything else you'd like to know?
+
+You: How much does it cost to ship 34 kg to 80331?
+  [tool] getShipmentQuote({"postalCode": "80331", "weightKg": 34})
+
+  ┌─ Reasoning trace ────────────────────────────────────
+  │  Intent   : How much does it cost to ship 34 kg to 80331?
+  │  Concepts : https://example.com/ont/cargobike, cus:Address, shp:ShipmentQuote
+  │  Tool     : getShipmentQuote — justified by https://example.com/ont/cargobike — tool operatesOn cus:Address, returns shp:ShipmentQuote
+  └──────────────────────────────────────────────────────
+
+Assistant: Here's your shipping quote:
+
+| Detail | Value |
+|---|---|
+| 📦 Weight | 34 kg |
+| 📍 Postal Code | 80331 (Germany) |
+| 💶 Shipping Cost | **€66.70** |
+| 🚚 Estimated Delivery | **3 days** |
+
+So shipping a 34 kg package to postal code 80331 (Munich, DE) would cost **€66.70** with an estimated delivery time of **3 business days**.
+
+You: How much does it cost to ship SKU-CB-002 to 80331?
+  [tool] getBikeBySku({"sku": "SKU-CB-002"})
+  [tool] getShipmentQuote({"postalCode": "80331", "weightKg": 34})
+
+  ┌─ Reasoning trace ────────────────────────────────────
+  │  Intent   : How much does it cost to ship SKU-CB-002 to 80331?
+  │  Concepts : https://example.com/ont/cargobike, cat:CargoBike, cus:Address, shp:ShipmentQuote
+  │  Inferred : cat:CargoBike rdfs:subClassOf dbo:Bicycle
+  │  Inferred : cat:EbikeCargoBike rdfs:subClassOf cat:CargoBike
+  │  Tool     : getBikeBySku — justified by https://example.com/ont/cargobike — tool operatesOn cat:CargoBike, returns cat:CargoBike
+  │  Tool     : getShipmentQuote — justified by https://example.com/ont/cargobike — tool operatesOn cus:Address, returns shp:ShipmentQuote
+  └──────────────────────────────────────────────────────
+
+Assistant: Here's the shipping summary for the **UrbanHauler 300 (SKU-CB-002)** to postal code **80331 (Munich, DE)**:
+
+| Detail | Value |
+|---|---|
+| 🚲 Model | UrbanHauler 300 |
+| ⚖️ Weight | 34 kg |
+| 💶 Shipping Cost | **€66.70** |
+| 🗓️ Estimated Delivery | **3 business days** |
+| 📦 Destination | 80331, Germany |
+
+The shipping cost is **€66.70**, with an estimated delivery time of **3 days**. Let me know if you'd like to place an order!
+
+You: Are there orders for bikes out of stock?
+  [tool] listOrders({})
+  [tool] listCargoBikes({})
+  [tool] getInventoryBySku({"sku": "SKU-ECB-900"})
+  [tool] getInventoryBySku({"sku": "SKU-CB-001"})
+  [tool] getInventoryBySku({"sku": "SKU-CB-002"})
+
+  ┌─ Reasoning trace ────────────────────────────────────
+  │  Intent   : Are there orders for bikes out of stock?
+  │  Concepts : https://example.com/ont/cargobike, ord:Order, cat:CargoBike, inv:InventoryItem
+  │  Inferred : cat:CargoBike rdfs:subClassOf dbo:Bicycle
+  │  Inferred : cat:EbikeCargoBike rdfs:subClassOf cat:CargoBike
+  │  Tool     : listOrders — justified by https://example.com/ont/cargobike — tool operatesOn ord:Order, returns ord:Order
+  │  Tool     : listCargoBikes — justified by https://example.com/ont/cargobike — tool operatesOn cat:CargoBike, returns cat:CargoBike
+  │  Tool     : getInventoryBySku — justified by https://example.com/ont/cargobike — tool operatesOn cat:CargoBike, returns inv:InventoryItem
+  │  Tool     : getInventoryBySku — justified by https://example.com/ont/cargobike — tool operatesOn cat:CargoBike, returns inv:InventoryItem
+  │  Tool     : getInventoryBySku — justified by https://example.com/ont/cargobike — tool operatesOn cat:CargoBike, returns inv:InventoryItem
+  └──────────────────────────────────────────────────────
+
+Assistant: Yes! There is **one order for a bike that is currently out of stock**:
+
+| Field | Details |
+|---|---|
+| **Order ID** | ORD-003 |
+| **Status** | PAID |
+| **Customer** | lars@example.com (BLUBB-789) |
+| **Bike Model** | UrbanHauler 300 |
+| **SKU** | SKU-CB-002 |
+| **Quantity Ordered** | 1 |
+| **Total Price** | €1,499.00 |
+| **Stock Available** | **0 units** (Warehouse NUE-01) |
+
+⚠️ **ORD-003 is PAID but the UrbanHauler 300 (SKU-CB-002) has zero units in stock.** This order cannot be fulfilled without restocking. You may want to contact the customer (lars@example.com) proactively and initiate a replenishment order.
+
+The other two orders are fine:
+- **ORD-001** – E-Cargo Pro (SKU-ECB-900): 3 in stock ✅
+- **ORD-002** – CargoMaster 500 (SKU-CB-001): 7 in stock ✅
+
+You: Give me details about BLUBB-123
+  [tool] getCustomer({"customerId": "BLUBB-123"})
+
+  ┌─ Reasoning trace ────────────────────────────────────
+  │  Intent   : Give me details about BLUBB-123
+  │  Concepts : https://example.com/ont/cargobike, cus:Customer
+  │  Inferred : cus:Customer rdfs:subClassOf gr:BusinessEntity
+  │  Tool     : getCustomer — justified by https://example.com/ont/cargobike — tool operatesOn cus:Customer, returns cus:Customer
+  └──────────────────────────────────────────────────────
+
+Assistant: Here are the details for customer **BLUBB-123**:
+
+| Field | Details |
+|---|---|
+| **Customer ID** | BLUBB-123 |
+| **Full Name** | Alex Müller |
+| **Email** | alex@example.com |
+| **Street** | Hauptstraße 1 |
+| **City** | Nürnberg |
+| **Postal Code** | 90402 |
+| **Country** | DE (Germany) |
+
+Is there anything else you'd like to know about this customer, such as their orders?
+
+You: Give me all orders from BLUBB-123
+
+  [tool] getCustomer({"customerId": "BLUBB-123"})
+  [tool] listOrders({})
+
+  ┌─ Reasoning trace ────────────────────────────────────
+  │  Intent   : Give me all orders from BLUBB-123
+  │  Concepts : https://example.com/ont/cargobike, cus:Customer, ord:Order
+  │  Inferred : cus:Customer rdfs:subClassOf gr:BusinessEntity
+  │  Tool     : getCustomer — justified by https://example.com/ont/cargobike — tool operatesOn cus:Customer, returns cus:Customer
+  │  Tool     : listOrders — justified by https://example.com/ont/cargobike — tool operatesOn ord:Order, returns ord:Order
+  └──────────────────────────────────────────────────────
+
+Assistant: Here are all the details for customer **Alex Müller** (BLUBB-123):
+
+---
+
+### 👤 Customer
+| Field | Value |
+|---|---|
+| **Name** | Alex Müller |
+| **Email** | alex@example.com |
+| **Address** | Hauptstraße 1, 90402 Nürnberg, DE |
+
+---
+
+### 📦 Orders
+
+After filtering all orders for BLUBB-123, Alex has **1 order**:
+
+| Field | Value |
+|---|---|
+| **Order ID** | ORD-001 |
+| **Status** | 🔄 PROCESSING |
+| **SKU** | SKU-ECB-900 |
+| **Quantity** | 1 |
+| **Unit Price** | €4,299.00 |
+| **Total Price** | €4,299.00 |
+
+---
+
+Alex currently has one active order for a single e-cargo bike (SKU-ECB-900) which is currently being processed. Let me know if you need any further details!
+
+You: Bye!
+
+Process finished with exit code 0
